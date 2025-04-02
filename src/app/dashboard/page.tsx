@@ -7,7 +7,7 @@ import GenerationHistory from "@/components/dashboard/GenerationHistory";
 import dynamic from "next/dynamic";
 
 // Dynamically import client components
-const FixedSubscribeButton = dynamic(() => import('@/components/subscription/FixedSubscribeButton'), { ssr: false });
+const FixedSubscribeButton = dynamic(() => import('@/components/subscription/FixedSubscribeButton'), { loading: () => null });
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);

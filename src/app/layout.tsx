@@ -4,8 +4,8 @@ import "./globals.css";
 import Providers from "./Providers";
 import dynamic from "next/dynamic";
 
-// Dynamically import the Header with ssr:false to avoid headers errors
-const Header = dynamic(() => import('@/components/layout/Header'), { ssr: false });
+// Dynamically import the Header to avoid client/server incompatibility issues
+const Header = dynamic(() => import('@/components/layout/Header'), { loading: () => null });
 
 const inter = Inter({ subsets: ["latin"] });
 
