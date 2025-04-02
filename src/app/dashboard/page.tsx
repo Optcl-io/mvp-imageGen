@@ -68,13 +68,20 @@ export default async function DashboardPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Digital Content Generator</h1>
           <div className="flex items-center">
-            <p className="text-gray-600">
+            <p className={`${user.subscription === "PAID" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"} px-3 py-1 rounded-full text-sm font-medium`}>
               {user.subscription === "PAID" ? "Premium" : "Free"} Account
             </p>
             <span className="mx-2">•</span>
             <p className="text-gray-600">
               {remainingGenerations} generation{remainingGenerations !== 1 ? "s" : ""} remaining today
             </p>
+            {user.subscription !== "PAID" && (
+              <div className="ml-4">
+                <a href="/pricing" className="text-blue-600 hover:text-blue-800 text-sm underline">
+                  Upgrade to Premium for more generations
+                </a>
+              </div>
+            )}
           </div>
         </div>
 

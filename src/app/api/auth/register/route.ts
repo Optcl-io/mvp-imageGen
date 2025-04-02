@@ -9,7 +9,8 @@ const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  subscription: z.enum(['FREE', 'PAID']).default('FREE'),
+  // We'll ignore this field - all users start as FREE regardless of what is sent
+  subscription: z.enum(['FREE', 'PAID']).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, email, password, subscription } = validationResult.data;
+    const { name, email, password } = validationResult.data;
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -42,13 +43,14 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
+    // Create user - always start with FREE subscription
+    // Subscription upgrades should only happen through Stripe payment process
     const user = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
-        subscription: subscription as Subscription,
+        subscription: Subscription.FREE, // Always start as FREE
       },
     });
 

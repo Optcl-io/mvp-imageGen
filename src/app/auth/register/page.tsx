@@ -39,7 +39,6 @@ export default function RegisterPage() {
           name,
           email,
           password,
-          subscription: plan.toUpperCase() === 'PAID' ? 'PAID' : 'FREE',
         }),
       });
 
@@ -56,8 +55,12 @@ export default function RegisterPage() {
         password,
       });
 
-      // Redirect to dashboard
-      router.push(callbackUrl);
+      // Redirect to dashboard or pricing page if plan param was 'paid'
+      if (plan.toLowerCase() === 'paid') {
+        router.push('/pricing'); // Redirect to pricing page to upgrade
+      } else {
+        router.push(callbackUrl);
+      }
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An error occurred during registration');
     } finally {
@@ -78,7 +81,12 @@ export default function RegisterPage() {
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             {plan.toUpperCase() === 'PAID' ? (
-              <span className="font-medium text-blue-600">Premium account</span>
+              <>
+                <span>Free account</span> 
+                <span className="block text-xs text-blue-600 mt-1">
+                  (You will be redirected to pricing after registration to complete upgrade)
+                </span>
+              </>
             ) : (
               <span>Free account</span>
             )}

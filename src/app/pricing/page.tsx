@@ -35,7 +35,7 @@ const tiers = [
       'Advanced customization options',
       'Download in multiple formats',
     ],
-    buttonText: 'Upgrade to Premium',
+    buttonText: 'Subscribe Now',
     buttonHref: '',
     isPrimary: true,
     activeLabel: 'Your Current Plan',
@@ -57,6 +57,10 @@ export default async function PricingPage() {
           <p className="mt-6 text-lg leading-8 text-gray-600">
             Choose the plan that works best for your content creation needs
           </p>
+          <div className="mt-6 text-center text-sm text-gray-500">
+            <p>Premium features are only available after successful payment processing.</p>
+            <p className="mt-2">Our secure payment system ensures that premium access is only granted after payment verification through Stripe.</p>
+          </div>
         </div>
         
         <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-y-10 gap-x-8 lg:max-w-4xl lg:grid-cols-2 lg:gap-y-0">
