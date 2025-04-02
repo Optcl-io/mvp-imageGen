@@ -2,7 +2,6 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
 import { SparklesIcon, CheckBadgeIcon, BoltIcon, ArrowPathIcon } from '@heroicons/react/24/solid';
 import SubscribeButton from '@/components/subscription/SubscribeButton';
-import Image from 'next/image';
 
 const tiers = [
   {

@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { headers } from 'next/headers';
 import { stripe } from '@/lib/stripe/stripe-client';
 import { prisma } from '@/lib/db/prisma';
 import { Subscription } from '@/lib/db/types';
-import Stripe from 'stripe';
 
 // Handling Stripe webhook events
 export async function POST(req: NextRequest) {
@@ -95,6 +93,7 @@ export async function POST(req: NextRequest) {
       }
       
       case 'invoice.payment_succeeded': {
+        /* eslint-disable @typescript-eslint/no-explicit-any */
         const invoice = event.data.object as any; // Cast to any to access properties
         const subscriptionId = invoice.subscription;
         const customerId = invoice.customer;

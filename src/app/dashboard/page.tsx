@@ -7,6 +7,7 @@ import GenerationHistory from "@/components/dashboard/GenerationHistory";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
+
 // Dynamically import client components
 const FixedSubscribeButton = dynamic(
   () => import('@/components/subscription/FixedSubscribeButton'),
@@ -148,7 +149,7 @@ export default async function DashboardPage() {
                 <h3 className="text-lg font-bold mb-4">Your Content Stats</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-white/10 p-4 rounded-xl">
-                    <p className="text-sm font-medium">Today's Generations</p>
+                    <p className="text-sm font-medium">Today&apos;s Generations</p>
                     <p className="text-2xl font-bold">{generationsToday}</p>
                   </div>
                   <div className="bg-white/10 p-4 rounded-xl">
@@ -171,7 +172,8 @@ export default async function DashboardPage() {
                     View All
                   </Link>
                 </div>
-                <GenerationHistory generations={generations} />
+                {/* eslint-disable @typescript-eslint/no-explicit-any */}
+                <GenerationHistory generations={generations as any} />
               </div>
             </div>
           </div>

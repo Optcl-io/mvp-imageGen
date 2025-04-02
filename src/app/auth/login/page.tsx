@@ -1,11 +1,11 @@
 'use client';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 
-export default function LoginPage() {
+function LoginPage2() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
@@ -36,6 +36,7 @@ export default function LoginPage() {
       router.push(callbackUrl);
     } catch (error) {
       setLoginError('An unexpected error occurred. Please try again.');
+      console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -46,11 +47,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-      <div className="w-full max-w-4xl rounded-2xl bg-white shadow-2xl overflow-hidden md:flex">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+      <div className="w-full max-w-4xl overflow-hidden bg-white shadow-2xl rounded-2xl md:flex">
         {/* Illustration Side */}
-        <div className="hidden md:block md:w-1/2 bg-gradient-to-br from-blue-500 to-purple-600 p-10">
-          <div className="h-full flex items-center justify-center">
+        <div className="hidden p-10 md:block md:w-1/2 bg-gradient-to-br from-blue-500 to-purple-600">
+          <div className="flex items-center justify-center h-full">
             <Image
               src="https://illustrations.popsy.co/amber/digital-nomad.svg"
               alt="Login Illustration"
@@ -62,8 +63,8 @@ export default function LoginPage() {
         </div>
 
         {/* Form Side */}
-        <div className="w-full md:w-1/2 p-10">
-          <div className="text-center mb-8">
+        <div className="w-full p-10 md:w-1/2">
+          <div className="mb-8 text-center">
             <h2 className="text-3xl font-bold text-gray-900">Welcome back!</h2>
             <p className="mt-2 text-gray-600">
               Sign in to your AdGenius account
@@ -71,7 +72,7 @@ export default function LoginPage() {
           </div>
 
           {(error || loginError) && (
-            <div className="mb-6 rounded-lg bg-red-50 p-4 text-red-800 text-sm">
+            <div className="p-4 mb-6 text-sm text-red-800 rounded-lg bg-red-50">
               {error === 'CredentialsSignin'
                 ? 'Invalid email or password'
                 : loginError || 'An error occurred. Please try again.'}
@@ -91,7 +92,7 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border"
+                className="block w-full p-3 mt-1 border border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 placeholder="you@example.com"
               />
             </div>
@@ -107,7 +108,7 @@ export default function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border"
+                className="block w-full p-3 mt-1 border border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 placeholder="••••••••"
               />
             </div>
@@ -117,9 +118,9 @@ export default function LoginPage() {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                <label htmlFor="remember-me" className="block ml-2 text-sm text-gray-700">
                   Remember me
                 </label>
               </div>
@@ -133,7 +134,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70"
+                className="flex justify-center w-full px-4 py-3 text-lg font-medium text-white border border-transparent rounded-lg shadow-sm bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70"
               >
                 {isLoading ? 'Signing in...' : 'Sign in'}
               </button>
@@ -146,17 +147,17 @@ export default function LoginPage() {
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
+                <span className="px-2 text-gray-500 bg-white">
                   Or continue with
                 </span>
               </div>
             </div>
 
-            <div className="mt-6 grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 mt-6">
               <div>
                 <button
                   onClick={handleGoogleSignIn}
-                  className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  className="inline-flex justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50"
                 >
                   <svg
                     className="w-5 h-5"
@@ -171,7 +172,7 @@ export default function LoginPage() {
               <div>
                 <button
                   type="button"
-                  className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  className="inline-flex justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50"
                 >
                   <svg
                     className="w-5 h-5"
@@ -188,7 +189,7 @@ export default function LoginPage() {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <Link href="/auth/register" className="font-medium text-blue-600 hover:text-blue-500">
                 Sign up
               </Link>
@@ -199,3 +200,13 @@ export default function LoginPage() {
     </div>
   );
 }
+
+const LoginPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginPage2 />
+    </Suspense>
+  );
+};
+
+export default LoginPage;

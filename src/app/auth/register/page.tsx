@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 import Image from 'next/image';
 
-export default function RegisterPage() {
+function RegisterPage2() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
@@ -72,11 +72,11 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-      <div className="w-full max-w-4xl rounded-2xl bg-white shadow-2xl overflow-hidden md:flex my-18">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+      <div className="w-full max-w-4xl overflow-hidden bg-white shadow-2xl rounded-2xl md:flex my-18">
         {/* Illustration Side */}
-        <div className="hidden md:block md:w-1/2 bg-gradient-to-br from-blue-500 to-purple-600 p-10">
-          <div className="h-full flex items-center justify-center">
+        <div className="hidden p-10 md:block md:w-1/2 bg-gradient-to-br from-blue-500 to-purple-600">
+          <div className="flex items-center justify-center h-full">
             <Image
               src="https://illustrations.popsy.co/amber/designer.svg"
               alt="Register Illustration"
@@ -88,15 +88,15 @@ export default function RegisterPage() {
         </div>
 
         {/* Form Side */}
-        <div className="w-full md:w-1/2 p-10">
-          <div className="text-center mb-8">
+        <div className="w-full p-10 md:w-1/2">
+          <div className="mb-8 text-center">
             <h2 className="text-3xl font-bold text-gray-900">Join OPTCL</h2>
             <p className="mt-2 text-gray-600">
               {plan.toUpperCase() === 'PAID' ? (
                 <>
                   <span>Start with a free account</span> 
-                  <span className="block text-xs text-blue-600 mt-1">
-                    (You'll upgrade to premium after registration)
+                  <span className="block mt-1 text-xs text-blue-600">
+                    (You&apos;ll upgrade to premium after registration)
                   </span>
                 </>
               ) : (
@@ -106,10 +106,10 @@ export default function RegisterPage() {
           </div>
 
           {error && (
-            <div className="mb-6 rounded-lg bg-red-50 p-4 text-red-800 text-sm">
+            <div className="p-4 mb-6 text-sm text-red-800 rounded-lg bg-red-50">
               <div className="flex items-center">
                 <svg
-                  className="h-5 w-5 text-red-500 mr-2"
+                  className="w-5 h-5 mr-2 text-red-500"
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 20 20"
                   fill="currentColor"
@@ -139,7 +139,7 @@ export default function RegisterPage() {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="block w-full px-4 py-3 mt-1 text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   placeholder="John Doe"
                 />
               </div>
@@ -155,7 +155,7 @@ export default function RegisterPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="block w-full px-4 py-3 mt-1 text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   placeholder="you@example.com"
                 />
               </div>
@@ -171,7 +171,7 @@ export default function RegisterPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="block w-full px-4 py-3 mt-1 text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   placeholder="••••••••"
                 />
               </div>
@@ -187,7 +187,7 @@ export default function RegisterPage() {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="block w-full px-4 py-3 mt-1 text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   placeholder="••••••••"
                 />
               </div>
@@ -197,12 +197,12 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70"
+                className="flex justify-center w-full px-4 py-3 text-lg font-medium text-white border border-transparent rounded-lg shadow-sm bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70"
               >
                 {isLoading ? (
                   <span className="flex items-center">
                     <svg
-                      className="-ml-1 mr-3 h-5 w-5 animate-spin text-white"
+                      className="w-5 h-5 mr-3 -ml-1 text-white animate-spin"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -236,17 +236,17 @@ export default function RegisterPage() {
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-2 text-gray-500">Or continue with</span>
+                <span className="px-2 text-gray-500 bg-white">Or continue with</span>
               </div>
             </div>
 
             <div className="mt-6">
               <button
                 onClick={handleGoogleSignIn}
-                className="w-full inline-flex justify-center items-center rounded-lg border border-gray-300 bg-white py-3 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+                className="inline-flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50"
               >
                 <svg
-                  className="h-5 w-5"
+                  className="w-5 h-5"
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
                 >
@@ -285,3 +285,14 @@ export default function RegisterPage() {
     </div>
   );
 }
+
+
+const RegisterPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <RegisterPage2 />
+    </Suspense>
+  );
+};
+
+export default RegisterPage;

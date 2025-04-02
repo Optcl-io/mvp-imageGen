@@ -6,6 +6,7 @@ import { stripe } from '@/lib/stripe/stripe-client';
 import Stripe from 'stripe';
 
 // This route is for debugging subscription status
+/* eslint-disable @typescript-eslint/no-unused-vars */
 export async function GET(request: NextRequest) {
   try {
     // Check authentication
@@ -57,6 +58,7 @@ export async function GET(request: NextRequest) {
       stripeSubscription: stripeSubscription ? {
         id: stripeSubscription.id,
         status: stripeSubscription.status,
+        /* eslint-disable @typescript-eslint/no-explicit-any */
         currentPeriodEnd: new Date((stripeSubscription as any).current_period_end * 1000).toISOString(),
       } : null,
     });

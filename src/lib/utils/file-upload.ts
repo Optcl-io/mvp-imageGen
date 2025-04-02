@@ -1,7 +1,6 @@
 import { randomUUID } from 'crypto';
 import fs from 'fs';
 import path from 'path';
-import { NextRequest } from 'next/server';
 import sharp from 'sharp';
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR || './public/uploads';

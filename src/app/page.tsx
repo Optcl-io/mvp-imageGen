@@ -318,7 +318,7 @@ export default async function Home() {
               What Our <span className="text-transparent bg-clip-text bg-white">Clients</span> Say
             </h2>
             <p className="text-xl text-gray-200 max-w-3xl mx-auto">
-              Don't just take our word for it - hear from our satisfied customers
+              Don&apos;t just take our word for it - hear from our satisfied customers
             </p>
           </div>
 
@@ -359,7 +359,7 @@ export default async function Home() {
                     </svg>
                   ))}
                 </div>
-                <p className="text-gray-600 italic mb-6">"{testimonial.quote}"</p>
+                <p className="text-gray-600 italic mb-6">&quot;{testimonial.quote}&quot;</p>
                 <div className="flex items-center">
                   <div className="relative h-12 w-12 rounded-full overflow-hidden mr-4">
                     <Image

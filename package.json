@@ -13,6 +13,7 @@
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
     "@prisma/client": "^6.5.0",
+    "@types/next": "^9.0.0",
     "axios": "^1.8.4",
     "bcryptjs": "^3.0.2",
     "jsonwebtoken": "^9.0.2",

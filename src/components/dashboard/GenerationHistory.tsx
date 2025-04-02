@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
 import { GenerationPlatform, GenerationStatus } from '@/lib/db/types';
 
 // Define Generation type manually since we aren't using the Prisma generated type
@@ -31,8 +30,6 @@ interface GenerationHistoryProps {
 }
 
 export default function GenerationHistory({ generations }: GenerationHistoryProps) {
-  const [selectedGeneration, setSelectedGeneration] = useState<Generation | null>(null);
-
   // Format generations with additional display properties
   const formattedGenerations: GenerationWithFormatting[] = generations.map(gen => {
     const formattedDate = new Date(gen.createdAt).toLocaleString();
@@ -67,6 +64,7 @@ export default function GenerationHistory({ generations }: GenerationHistoryProp
   });
 
   // Handle generation download
+  /* eslint-disable @typescript-eslint/no-unused-vars */
   const handleDownload = (imageUrl: string | null, platform: GenerationPlatform) => {
     if (!imageUrl) return;
     

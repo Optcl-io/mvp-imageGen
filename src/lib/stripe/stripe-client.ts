@@ -68,6 +68,7 @@ export async function createCheckoutSession({
 
 // Function to handle successful subscription update
 export async function handleSubscriptionUpdated({
+  /* eslint-disable @typescript-eslint/no-unused-vars */
   userId,
   subscriptionId,
 }: {

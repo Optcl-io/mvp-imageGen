@@ -7,6 +7,7 @@ const openai = new OpenAI({
 });
 
 // Define platform-specific dimensions
+/* eslint-disable @typescript-eslint/no-unused-vars */
 const PLATFORM_DIMENSIONS: Record<GenerationPlatform, { width: number; height: number }> = {
   [GenerationPlatform.DIGITAL_SIGNAGE]: { width: 1920, height: 1080 }, // 16:9 aspect ratio
   [GenerationPlatform.INSTAGRAM_POST]: { width: 1080, height: 1080 }, // 1:1 aspect ratio

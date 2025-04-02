@@ -2,7 +2,7 @@
 
 import { Session } from 'next-auth';
 import { useSession } from 'next-auth/react';
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 
 // Global state to prevent excessive refreshing across all components
 const globalState = {

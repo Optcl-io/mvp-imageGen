@@ -345,7 +345,7 @@ export default function ContentGeneratorForm({
         {remainingGenerations > 0 ? (
           <p>You have <span className="font-bold text-indigo-600">{remainingGenerations}</span> generations left today</p>
         ) : (
-          <p className="text-red-500">You've used all your generations for today</p>
+          <p className="text-red-500">You&apos;ve used all your generations for today</p>
         )}
       </div>
     </div>
