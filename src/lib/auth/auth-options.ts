@@ -14,6 +14,7 @@ declare module "next-auth" {
       image?: string | null;
       role: "USER" | "ADMIN";
       subscription: "FREE" | "PAID";
+      lastRefreshed?: number;
     };
   }
 
@@ -29,6 +30,7 @@ declare module "next-auth/jwt" {
     id: string;
     role: "USER" | "ADMIN";
     subscription: "FREE" | "PAID";
+    lastRefreshed?: number;
   }
 }
 
@@ -79,6 +81,7 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
     async jwt({ token, user, trigger }) {
@@ -87,25 +90,34 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.role = user.role;
         token.subscription = user.subscription;
+        token.lastRefreshed = Date.now();
       }
       
-      // Refresh the subscription status on token updates
+      // Refresh the subscription status on token updates, but not too frequently
       if (trigger === 'update') {
-        try {
-          // Get the latest user data from the database
-          const latestUser = await prisma.user.findUnique({
-            where: { id: token.id as string },
-            select: { subscription: true, role: true },
-          });
-          
-          if (latestUser) {
-            // Update token with latest user data
-            token.subscription = latestUser.subscription;
-            token.role = latestUser.role;
-            console.log(`Token refreshed for user ${token.id}, subscription: ${token.subscription}`);
+        // Only refresh from database if it's been at least 5 minutes since last refresh
+        // or if there's no lastRefreshed timestamp
+        const now = Date.now();
+        const fiveMinutes = 5 * 60 * 1000;
+        
+        if (!token.lastRefreshed || (now - token.lastRefreshed) > fiveMinutes) {
+          try {
+            // Get the latest user data from the database
+            const latestUser = await prisma.user.findUnique({
+              where: { id: token.id as string },
+              select: { subscription: true, role: true },
+            });
+            
+            if (latestUser) {
+              // Update token with latest user data
+              token.subscription = latestUser.subscription;
+              token.role = latestUser.role;
+              token.lastRefreshed = now;
+              console.log(`Token refreshed for user ${token.id}, subscription: ${token.subscription}`);
+            }
+          } catch (error) {
+            console.error('Error refreshing user data:', error);
           }
-        } catch (error) {
-          console.error('Error refreshing user data:', error);
         }
       }
       
@@ -116,6 +128,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id;
         session.user.role = token.role;
         session.user.subscription = token.subscription;
+        session.user.lastRefreshed = token.lastRefreshed;
       }
       return session;
     },

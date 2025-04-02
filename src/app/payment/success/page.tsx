@@ -8,7 +8,7 @@ import { useSessionRefresh } from '@/lib/stripe/session-helpers';
 
 export default function PaymentSuccessPage() {
   const router = useRouter();
-  const { session, refreshSession, isSubscribed } = useSessionRefresh();
+  const { session, refreshSession, isSubscribed, isRefreshing } = useSessionRefresh();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
   const [isVerifying, setIsVerifying] = useState(true);
@@ -17,9 +17,9 @@ export default function PaymentSuccessPage() {
   useEffect(() => {
     // Update the session to reflect the new subscription status
     const verifySubscription = async () => {
-      if (session) {
-        // Try to refresh the session up to 3 times
-        const success = await refreshSession();
+      if (session && !isRefreshing) {
+        // Try to refresh the session with force=true to bypass the refresh rate limit
+        const success = await refreshSession(true);
         
         if (success && isSubscribed) {
           setIsVerifying(false);
@@ -31,7 +31,6 @@ export default function PaymentSuccessPage() {
           // Try again in 2 seconds, up to 5 times (10 seconds total)
           setTimeout(() => {
             setAttempts(prev => prev + 1);
-            verifySubscription();
           }, 2000);
         } else {
           // Give up after 5 attempts and just show success
@@ -41,7 +40,7 @@ export default function PaymentSuccessPage() {
     };
 
     verifySubscription();
-  }, [session, refreshSession, isSubscribed, router, attempts]);
+  }, [session, refreshSession, isSubscribed, router, attempts, isRefreshing]);
 
   // If no session ID is provided, redirect immediately
   useEffect(() => {
