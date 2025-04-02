@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "./Providers";
+import dynamic from "next/dynamic";
+
+// Dynamically import the Header to avoid hydration issues
+const Header = dynamic(() => import('@/components/layout/Header'), { ssr: true });
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,7 +22,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Providers>{children}</Providers>
+        <Providers>
+          <Header />
+          <main>{children}</main>
+        </Providers>
       </body>
     </html>
   );

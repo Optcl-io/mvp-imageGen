@@ -4,6 +4,10 @@ import { authOptions } from "@/lib/auth/auth-options";
 import { prisma } from "@/lib/db/prisma";
 import ContentGeneratorForm from "@/components/forms/ContentGeneratorForm";
 import GenerationHistory from "@/components/dashboard/GenerationHistory";
+import dynamic from "next/dynamic";
+
+// Dynamically import client components
+const FixedSubscribeButton = dynamic(() => import('@/components/subscription/FixedSubscribeButton'), { ssr: false });
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -59,38 +63,41 @@ export default async function DashboardPage() {
   });
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Digital Content Generator</h1>
-        <div className="flex items-center">
-          <p className="text-gray-600">
-            {user.subscription === "PAID" ? "Premium" : "Free"} Account
-          </p>
-          <span className="mx-2">•</span>
-          <p className="text-gray-600">
-            {remainingGenerations} generation{remainingGenerations !== 1 ? "s" : ""} remaining today
-          </p>
+    <>
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Digital Content Generator</h1>
+          <div className="flex items-center">
+            <p className="text-gray-600">
+              {user.subscription === "PAID" ? "Premium" : "Free"} Account
+            </p>
+            <span className="mx-2">•</span>
+            <p className="text-gray-600">
+              {remainingGenerations} generation{remainingGenerations !== 1 ? "s" : ""} remaining today
+            </p>
+          </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4">Generate New Content</h2>
-            <ContentGeneratorForm 
-              images={images} 
-              remainingGenerations={remainingGenerations} 
-            />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div>
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold mb-4">Generate New Content</h2>
+              <ContentGeneratorForm 
+                images={images} 
+                remainingGenerations={remainingGenerations} 
+              />
+            </div>
           </div>
-        </div>
-        
-        <div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4">Recent Generations</h2>
-            <GenerationHistory generations={generations} />
+          
+          <div>
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold mb-4">Recent Generations</h2>
+              <GenerationHistory generations={generations} />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+      <FixedSubscribeButton />
+    </>
   );
 } 
