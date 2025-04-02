@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { GenerationPlatform } from '@/lib/db/types';
 
-// Define Image type manually since we aren't using the Prisma generated type
 type ImageType = {
   id: string;
   userId: string;
@@ -41,7 +40,6 @@ export default function ContentGeneratorForm({
   const [platform, setPlatform] = useState<GenerationPlatform>(GenerationPlatform.DIGITAL_SIGNAGE);
   const [brandColors, setBrandColors] = useState('');
 
-  // Handle image upload
   const handleImageUpload = async (e: FormEvent) => {
     e.preventDefault();
     
@@ -69,20 +67,17 @@ export default function ContentGeneratorForm({
         throw new Error(data.error || 'Failed to upload image');
       }
 
-      // Refresh the page to get the new image
       router.refresh();
     } catch (error) {
       setUploadError(error instanceof Error ? error.message : 'Failed to upload image');
     } finally {
       setIsUploading(false);
-      // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     }
   };
 
-  // Handle content generation
   const handleGenerateContent = async (e: FormEvent) => {
     e.preventDefault();
 
@@ -127,7 +122,6 @@ export default function ContentGeneratorForm({
         throw new Error(data.error || 'Failed to generate content');
       }
 
-      // Refresh the page to show the new generation
       router.refresh();
     } catch (error) {
       setGenerationError(error instanceof Error ? error.message : 'Failed to generate content');
@@ -137,44 +131,66 @@ export default function ContentGeneratorForm({
   };
 
   return (
-    <div>
+    <div className="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-lg">
+      <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-6">
+        Content Generator
+      </h2>
+
       {/* Image Upload Section */}
-      <div className="mb-8">
-        <h3 className="text-lg font-medium mb-3">1. Upload Product Image</h3>
-        <form onSubmit={handleImageUpload} className="mb-4">
-          <div className="mb-3">
-            <input
-              type="file"
-              ref={fileInputRef}
-              accept="image/jpeg,image/png,image/webp"
-              className="block w-full text-sm text-gray-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-md file:border-0
-                file:text-sm file:font-medium
-                file:bg-blue-50 file:text-blue-700
-                hover:file:bg-blue-100"
-            />
+      <div className="mb-8 p-6 bg-indigo-50 rounded-lg border border-indigo-100">
+        <div className="flex items-center mb-4">
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white font-bold mr-3">
+            1
           </div>
-          <button
-            type="submit"
-            disabled={isUploading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-300"
-          >
-            {isUploading ? 'Uploading...' : 'Upload Image'}
-          </button>
+          <h3 className="text-lg font-semibold text-indigo-800">Upload Product Image</h3>
+        </div>
+        
+        <form onSubmit={handleImageUpload} className="mb-4">
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/jpeg,image/png,image/webp"
+                className="block w-full text-sm text-gray-700
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-lg file:border-0
+                  file:text-sm file:font-medium
+                  file:bg-white file:text-indigo-700
+                  hover:file:bg-indigo-50 file:shadow-sm file:border file:border-indigo-200"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={isUploading}
+              className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-indigo-300 shadow-sm transition-colors flex items-center"
+            >
+              {isUploading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Uploading...
+                </>
+              ) : 'Upload'}
+            </button>
+          </div>
           {uploadError && <p className="mt-2 text-red-500 text-sm">{uploadError}</p>}
         </form>
 
         {/* Image Gallery */}
         {images.length > 0 && (
-          <div>
-            <h4 className="text-sm font-medium mb-2">Select an image:</h4>
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+          <div className="mt-6">
+            <h4 className="text-sm font-medium mb-3 text-gray-700">Select an image:</h4>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {images.map((image) => (
                 <div
                   key={image.id}
-                  className={`relative aspect-square cursor-pointer rounded-md overflow-hidden border-2 ${
-                    selectedImage?.id === image.id ? 'border-blue-500' : 'border-transparent'
+                  className={`relative aspect-square cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
+                    selectedImage?.id === image.id 
+                      ? 'border-indigo-500 ring-2 ring-indigo-200' 
+                      : 'border-gray-200 hover:border-indigo-300'
                   }`}
                   onClick={() => setSelectedImage(image)}
                 >
@@ -182,8 +198,15 @@ export default function ContentGeneratorForm({
                     src={image.url}
                     alt="Uploaded product"
                     fill
-                    style={{ objectFit: 'cover' }}
+                    className="object-cover"
                   />
+                  {selectedImage?.id === image.id && (
+                    <div className="absolute inset-0 bg-indigo-600 bg-opacity-20 flex items-center justify-center">
+                      <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -192,83 +215,91 @@ export default function ContentGeneratorForm({
       </div>
 
       {/* Generation Form */}
-      <div>
-        <h3 className="text-lg font-medium mb-3">2. Enter Details & Generate</h3>
+      <div className="p-6 bg-purple-50 rounded-lg border border-purple-100">
+        <div className="flex items-center mb-4">
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-600 text-white font-bold mr-3">
+            2
+          </div>
+          <h3 className="text-lg font-semibold text-purple-800">Enter Details & Generate</h3>
+        </div>
+
         <form onSubmit={handleGenerateContent}>
-          <div className="grid grid-cols-1 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Product Name*
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700">
+                Product Name<span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 value={productName}
                 onChange={(e) => setProductName(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="e.g. Premium Coffee Blend"
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Slogan/Tagline*
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700">
+                Slogan/Tagline<span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 value={slogan}
                 onChange={(e) => setSlogan(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="e.g. Wake Up Your Senses"
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700">
                 Price
               </label>
               <input
                 type="text"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md"
-                placeholder="e.g. $99.99"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="e.g. $19.99"
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700">
                 Target Audience
               </label>
               <input
                 type="text"
                 value={audience}
                 onChange={(e) => setAudience(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md"
-                placeholder="e.g. Young adults, professionals"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="e.g. Young professionals, 25-35"
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700">
                 Brand Colors
               </label>
               <input
                 type="text"
                 value={brandColors}
                 onChange={(e) => setBrandColors(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md"
-                placeholder="e.g. Blue and white, #FF5500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="e.g. #3B82F6 (blue) and white"
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700">
                 Platform
               </label>
               <select
                 value={platform}
                 onChange={(e) => setPlatform(e.target.value as GenerationPlatform)}
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white"
               >
                 <option value={GenerationPlatform.DIGITAL_SIGNAGE}>Digital Signage</option>
                 <option value={GenerationPlatform.INSTAGRAM_POST}>Instagram Post</option>
@@ -276,20 +307,47 @@ export default function ContentGeneratorForm({
                 <option value={GenerationPlatform.TIKTOK}>TikTok</option>
               </select>
             </div>
+          </div>
 
-            <div className="mt-2">
-              <button
-                type="submit"
-                disabled={isGenerating || remainingGenerations <= 0 || !selectedImage}
-                className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-300"
-              >
-                {isGenerating ? 'Generating...' : `Generate Content (${remainingGenerations} left today)`}
-              </button>
-              {generationError && <p className="mt-2 text-red-500 text-sm">{generationError}</p>}
-            </div>
+          <div className="mt-6">
+            <button
+              type="submit"
+              disabled={isGenerating || remainingGenerations <= 0 || !selectedImage}
+              className={`w-full py-3 px-4 rounded-lg font-medium text-white shadow-md transition-all ${
+                isGenerating || remainingGenerations <= 0 || !selectedImage
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700'
+              }`}
+            >
+              {isGenerating ? (
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Generating Creative Content...
+                </span>
+              ) : (
+                `Generate Content (${remainingGenerations} remaining today)`
+              )}
+            </button>
+            {generationError && (
+              <div className="mt-3 p-3 bg-red-50 rounded-lg border border-red-200">
+                <p className="text-red-600 text-sm">{generationError}</p>
+              </div>
+            )}
           </div>
         </form>
       </div>
+
+      {/* Generation Counter */}
+      <div className="mt-4 text-center text-sm text-gray-500">
+        {remainingGenerations > 0 ? (
+          <p>You have <span className="font-bold text-indigo-600">{remainingGenerations}</span> generations left today</p>
+        ) : (
+          <p className="text-red-500">You've used all your generations for today</p>
+        )}
+      </div>
     </div>
   );
-} 
+}

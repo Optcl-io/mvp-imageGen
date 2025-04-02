@@ -1,44 +1,49 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
-import { CheckIcon } from '@heroicons/react/24/outline';
+import { SparklesIcon, CheckBadgeIcon, BoltIcon, ArrowPathIcon } from '@heroicons/react/24/solid';
 import SubscribeButton from '@/components/subscription/SubscribeButton';
+import Image from 'next/image';
 
-// Define the pricing tiers
 const tiers = [
   {
-    name: 'Free',
+    name: 'Starter',
     id: 'free',
     price: '$0',
-    description: 'Basic features for individual creators',
+    description: 'Perfect for trying out the platform',
     features: [
-      `${process.env.FREE_TIER_DAILY_LIMIT || '1'} generation per day`,
+      `${process.env.FREE_TIER_DAILY_LIMIT || '3'} generations per day`,
       'Basic templates',
-      'Standard quality outputs',
-      'Community support',
+      'Standard resolution outputs',
+      'Email support',
+      'Watermarked downloads'
     ],
-    buttonText: 'Get Started',
+    buttonText: 'Get Started Free',
     buttonHref: '/auth/register?plan=free',
     isPrimary: false,
     activeLabel: 'Your Current Plan',
+    icon: <ArrowPathIcon className="h-6 w-6 text-blue-500" />
   },
   {
-    name: 'Premium',
+    name: 'Pro',
     id: 'premium',
-    price: '$9.99',
-    period: 'monthly',
-    description: 'Advanced features for serious content creators',
+    price: '$29',
+    period: 'month',
+    description: 'For serious content creators & businesses',
     features: [
-      `${process.env.PAID_TIER_DAILY_LIMIT || '5'} generations per day`,
-      'All templates',
-      'High-quality outputs',
+      `${process.env.PAID_TIER_DAILY_LIMIT || '15'} generations per day`,
+      'All premium templates',
+      'High-resolution downloads',
       'Priority support',
-      'Advanced customization options',
-      'Download in multiple formats',
+      'Brand customization',
+      'Multiple formats (PNG, JPG, PDF)',
+      'Commercial usage rights',
+      'No watermarks'
     ],
-    buttonText: 'Subscribe Now',
+    buttonText: 'Upgrade to Pro',
     buttonHref: '',
     isPrimary: true,
     activeLabel: 'Your Current Plan',
+    icon: <SparklesIcon className="h-6 w-6 text-yellow-400" />
   },
 ];
 
@@ -48,22 +53,20 @@ export default async function PricingPage() {
   const currentSubscription = session?.user?.subscription || 'FREE';
 
   return (
-    <div className="bg-white py-24 sm:py-32">
+    <div className="bg-gradient-to-b from-white to-blue-50 py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        {/* Hero Section */}
         <div className="mx-auto max-w-4xl text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            Pricing Plans
+          <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+            Simple, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Transparent</span> Pricing
           </h1>
-          <p className="mt-6 text-lg leading-8 text-gray-600">
-            Choose the plan that works best for your content creation needs
+          <p className="mt-6 text-xl leading-8 text-gray-600">
+            Choose the perfect plan for your creative needs
           </p>
-          <div className="mt-6 text-center text-sm text-gray-500">
-            <p>Premium features are only available after successful payment processing.</p>
-            <p className="mt-2">Our secure payment system ensures that premium access is only granted after payment verification through Stripe.</p>
-          </div>
         </div>
-        
-        <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-y-10 gap-x-8 lg:max-w-4xl lg:grid-cols-2 lg:gap-y-0">
+
+        {/* Pricing Cards */}
+        <div className="mx-auto mt-20 grid max-w-2xl grid-cols-1 gap-8 lg:max-w-5xl lg:grid-cols-2">
           {tiers.map((tier) => {
             const isCurrentPlan = tier.id === 'premium' 
               ? currentSubscription === 'PAID' 
@@ -72,82 +75,148 @@ export default async function PricingPage() {
             return (
               <div 
                 key={tier.id}
-                className={`relative rounded-2xl border p-8 shadow-sm ${
-                  tier.isPrimary ? 'border-indigo-600 ring-2 ring-indigo-600' : 'border-gray-200'
+                className={`relative rounded-2xl p-8 shadow-xl ${
+                  tier.isPrimary 
+                    ? 'bg-gradient-to-br from-purple-600 to-blue-600 text-white border-0'
+                    : 'bg-white text-gray-900 border border-gray-200'
                 }`}
               >
                 {isCurrentPlan && (
-                  <div className="absolute -top-3 right-10 inline-flex items-center rounded-md bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 inline-flex items-center rounded-full bg-gradient-to-r from-yellow-400 to-orange-400 px-4 py-1 text-sm font-bold text-white shadow-lg">
                     {tier.activeLabel}
                   </div>
                 )}
                 
-                <div className="flex flex-col items-start gap-x-8">
-                  <h3 
-                    className={`text-lg font-semibold leading-8 ${
-                      tier.isPrimary ? 'text-indigo-600' : 'text-gray-900'
-                    }`}
-                  >
-                    {tier.name}
-                  </h3>
-                  <p className="mt-4 text-sm leading-6 text-gray-600">{tier.description}</p>
-                  <p className="mt-6 flex items-baseline gap-x-1">
-                    <span className="text-4xl font-bold tracking-tight text-gray-900">{tier.price}</span>
+                <div className="flex items-center mb-6">
+                  <div className={`p-3 rounded-lg mr-4 ${
+                    tier.isPrimary ? 'bg-white/20' : 'bg-blue-100'
+                  }`}>
+                    {tier.icon}
+                  </div>
+                  <h3 className="text-2xl font-bold">{tier.name}</h3>
+                </div>
+                
+                <p className={`text-lg mb-6 ${
+                  tier.isPrimary ? 'text-blue-100' : 'text-gray-600'
+                }`}>
+                  {tier.description}
+                </p>
+                
+                <div className="mb-8">
+                  <p className="text-5xl font-bold mb-2">
+                    {tier.price}
                     {tier.period && (
-                      <span className="text-sm font-semibold leading-6 text-gray-600">/{tier.period}</span>
+                      <span className="text-xl font-normal">/{tier.period}</span>
                     )}
                   </p>
-                  
-                  <ul role="list" className="mt-8 space-y-3 text-sm leading-6 text-gray-600 w-full">
-                    {tier.features.map((feature) => (
-                      <li key={feature} className="flex gap-x-3">
-                        <CheckIcon className="h-5 w-5 flex-none text-indigo-600" aria-hidden="true" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  
-                  <div className="mt-8 w-full">
-                    {tier.id === 'premium' ? (
-                      isCurrentPlan ? (
-                        <button
-                          disabled
-                          className="rounded-md w-full bg-gray-300 px-3.5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm"
-                        >
-                          Already subscribed
-                        </button>
-                      ) : (
-                        <SubscribeButton 
-                          priceId={process.env.STRIPE_PREMIUM_PRICE_ID || undefined}
-                          className="w-full"
-                        >
-                          {tier.buttonText}
-                        </SubscribeButton>
-                      )
+                  {tier.id === 'premium' && (
+                    <p className="text-sm">Billed monthly. Cancel anytime.</p>
+                  )}
+                </div>
+                
+                <ul role="list" className="space-y-4 mb-10">
+                  {tier.features.map((feature) => (
+                    <li key={feature} className="flex items-start">
+                      <div className={`flex-shrink-0 p-1 rounded-full mr-3 ${
+                        tier.isPrimary ? 'bg-white/20' : 'bg-blue-100'
+                      }`}>
+                        <CheckBadgeIcon className={`h-5 w-5 ${
+                          tier.isPrimary ? 'text-white' : 'text-blue-600'
+                        }`} />
+                      </div>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                
+                <div className="mt-auto">
+                  {tier.id === 'premium' ? (
+                    isCurrentPlan ? (
+                      <button
+                        disabled
+                        className={`w-full py-3 px-4 rounded-xl font-bold ${
+                          tier.isPrimary 
+                            ? 'bg-white/20 text-white' 
+                            : 'bg-gray-200 text-gray-700'
+                        }`}
+                      >
+                        ✓ Current Plan
+                      </button>
                     ) : (
-                      isAuthenticated ? (
-                        <button
-                          disabled
-                          className="rounded-md w-full bg-gray-100 px-3.5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm"
-                        >
-                          {isCurrentPlan ? 'Current Plan' : 'Downgrade'}
-                        </button>
-                      ) : (
-                        <a
-                          href={tier.buttonHref}
-                          className="rounded-md w-full block text-center bg-gray-100 px-3.5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-200"
-                        >
-                          {tier.buttonText}
-                        </a>
-                      )
-                    )}
-                  </div>
+                      <SubscribeButton 
+                        priceId={process.env.STRIPE_PREMIUM_PRICE_ID || undefined}
+                        className={`w-full py-3 px-4 rounded-xl font-bold shadow-lg ${
+                          tier.isPrimary
+                            ? 'bg-red-400 text-black hover:bg-blue-50'
+                            : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700'
+                        }`}
+                      >
+                        {tier.buttonText}
+                      </SubscribeButton>
+                    )
+                  ) : (
+                    isAuthenticated ? (
+                      <button
+                        disabled
+                        className={`w-full py-3 px-4 rounded-xl font-bold ${
+                          isCurrentPlan 
+                            ? 'bg-blue-100 text-blue-800' 
+                            : 'bg-gray-200 text-gray-700'
+                        }`}
+                      >
+                        {isCurrentPlan ? '✓ Current Plan' : 'Downgrade'}
+                      </button>
+                    ) : (
+                      <a
+                        href={tier.buttonHref}
+                        className="block w-full py-3 px-4 bg-gray-900 hover:bg-gray-800 text-white rounded-xl font-bold text-center shadow-lg transition-colors"
+                      >
+                        {tier.buttonText}
+                      </a>
+                    )
+                  )}
                 </div>
               </div>
             );
           })}
         </div>
+
+                {/* Features Grid */}
+                <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            {
+              name: 'Unlimited Creativity',
+              icon: <BoltIcon className="h-8 w-8 text-purple-600" />,
+              description: 'Generate as many variations as you need'
+            },
+            {
+              name: 'Premium Quality',
+              icon: <CheckBadgeIcon className="h-8 w-8 text-blue-600" />,
+              description: 'High-resolution, professional-grade outputs'
+            },
+            {
+              name: 'Instant Access',
+              icon: <SparklesIcon className="h-8 w-8 text-yellow-500" />,
+              description: 'Start creating immediately after signup'
+            },
+            {
+              name: 'Secure Payments',
+              icon: <SparklesIcon className="h-8 w-8 text-yellow-500" />,
+              description: 'Powered by Stripe for secure transactions'
+            }
+          ].map((feature) => (
+            <div key={feature.name} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+              <div className="flex items-center mb-4">
+                <div className="bg-blue-50 p-2 rounded-lg mr-4">
+                  {feature.icon}
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">{feature.name}</h3>
+              </div>
+              <p className="text-gray-600">{feature.description}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
-} 
+}

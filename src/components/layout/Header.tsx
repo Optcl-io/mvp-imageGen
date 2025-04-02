@@ -1,6 +1,5 @@
 'use client';
-
-import { Fragment, useEffect, useRef } from 'react';
+import { Fragment } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
@@ -8,93 +7,77 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useSession, signOut } from 'next-auth/react';
 import Image from 'next/image';
 
-// Store refresh state globally to prevent multiple components from refreshing
-const globalRefreshed = { current: false };
-
 const navigation = [
   { name: 'Home', href: '/' },
   { name: 'Dashboard', href: '/dashboard' },
   { name: 'Pricing', href: '/pricing' },
 ];
 
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ');
-}
-
 export default function Header() {
   const { data: session } = useSession();
   const pathname = usePathname();
-  
-  // Only refresh when visiting the dashboard or pricing pages
-  // and only if the global refresh hasn't happened yet
-  const shouldRefreshPaths = ['/dashboard', '/pricing'];
-  const needsRefresh = useRef(
-    !globalRefreshed.current && shouldRefreshPaths.includes(pathname)
-  );
-
-  // No more automatic session refresh in the component
-  // This prevents the excessive CSRF and session API calls
 
   return (
-    <Disclosure as="nav" className="bg-white shadow">
-      {({ open }: { open: boolean }) => (
+    <Disclosure as="nav" className="bg-gradient-to-r from-purple-900 to-blue-800 shadow-lg z-40">
+      {({ open }) => (
         <>
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex h-16 justify-between">
-              <div className="flex">
-                <div className="flex flex-shrink-0 items-center">
-                  <Link href="/">
-                    <span className="text-xl font-bold text-indigo-600">
-                      OPTCL
-                    </span>
-                  </Link>
-                </div>
-                <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                  {navigation.map((item) => {
-                    const isActive = pathname === item.href;
-                    return (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        className={classNames(
-                          isActive
-                            ? 'border-indigo-500 text-gray-900'
-                            : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
-                          'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium'
-                        )}
-                      >
-                        {item.name}
-                      </Link>
-                    );
-                  })}
+            <div className="flex h-20 items-center justify-between">
+              <div className="flex items-center">
+                <Link href="/" className="flex items-center">
+                  <Image
+                    src="/logo.svg"
+                    alt="Logo"
+                    width={40}
+                    height={40}
+                    className="h-10 w-10"
+                  />
+                  <span className="ml-3 text-2xl font-bold text-white">
+                    Optcl
+                  </span>
+                </Link>
+              </div>
+              <div className="hidden md:block">
+                <div className="ml-10 flex items-center space-x-8">
+                  {navigation.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`px-3 py-2 text-lg font-medium ${
+                        pathname === item.href
+                          ? 'rounded-lg bg-white/20 text-white'
+                          : 'text-white/80 hover:text-white hover:underline'
+                      }`}
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
                 </div>
               </div>
-              <div className="hidden sm:ml-6 sm:flex sm:items-center">
+              <div className="hidden md:block">
                 {session?.user ? (
                   <Menu as="div" className="relative ml-3">
-                    <div>
-                      <Menu.Button className="flex rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                        <span className="sr-only">Open user menu</span>
-                        {session.user.image ? (
-                          <Image
-                            className="h-8 w-8 rounded-full"
-                            src={session.user.image}
-                            alt=""
-                            width={32}
-                            height={32}
-                          />
-                        ) : (
-                          <div className="h-8 w-8 rounded-full bg-indigo-100 text-center flex items-center justify-center">
-                            <span className="text-indigo-800 font-medium">
-                              {session.user.name?.charAt(0).toUpperCase() || 'U'}
-                            </span>
-                          </div>
-                        )}
-                      </Menu.Button>
-                    </div>
+                    <Menu.Button className="flex rounded-full bg-white/10 text-sm focus:outline-none">
+                      <span className="sr-only">Open user menu</span>
+                      {session.user.image ? (
+                        <Image
+                          className="h-10 w-10 rounded-full border-2 border-white/30"
+                          src={session.user.image}
+                          alt=""
+                          width={40}
+                          height={40}
+                        />
+                      ) : (
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
+                          <span className="text-xl font-bold text-white">
+                            {session.user.name?.charAt(0).toUpperCase() || 'U'}
+                          </span>
+                        </div>
+                      )}
+                    </Menu.Button>
                     <Transition
                       as={Fragment}
-                      enter="transition ease-out duration-200"
+                      enter="transition ease-out duration-100"
                       enterFrom="transform opacity-0 scale-95"
                       enterTo="transform opacity-100 scale-100"
                       leave="transition ease-in duration-75"
@@ -102,51 +85,25 @@ export default function Header() {
                       leaveTo="transform opacity-0 scale-95"
                     >
                       <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                        <div className="px-4 py-2 text-xs text-gray-500">
-                          {session.user.subscription === 'PAID' ? (
-                            <span className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2 py-0.5 rounded">
-                              Premium
-                            </span>
-                          ) : (
-                            <span>Free Plan</span>
-                          )}
-                        </div>
                         <Menu.Item>
-                          {({ active }: { active: boolean }) => (
+                          {({ active }) => (
                             <Link
                               href="/dashboard"
-                              className={classNames(
-                                active ? 'bg-gray-100' : '',
-                                'block px-4 py-2 text-sm text-gray-700'
-                              )}
+                              className={`block px-4 py-2 text-sm ${
+                                active ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                              }`}
                             >
                               Dashboard
                             </Link>
                           )}
                         </Menu.Item>
-                        {session.user.subscription !== 'PAID' && (
-                          <Menu.Item>
-                            {({ active }: { active: boolean }) => (
-                              <Link
-                                href="/pricing"
-                                className={classNames(
-                                  active ? 'bg-gray-100' : '',
-                                  'block px-4 py-2 text-sm text-gray-700'
-                                )}
-                              >
-                                Upgrade to Premium
-                              </Link>
-                            )}
-                          </Menu.Item>
-                        )}
                         <Menu.Item>
-                          {({ active }: { active: boolean }) => (
+                          {({ active }) => (
                             <button
                               onClick={() => signOut({ callbackUrl: '/' })}
-                              className={classNames(
-                                active ? 'bg-gray-100' : '',
-                                'block w-full text-left px-4 py-2 text-sm text-gray-700'
-                              )}
+                              className={`block w-full px-4 py-2 text-left text-sm ${
+                                active ? 'bg-red-50 text-red-600' : 'text-gray-700'
+                              }`}
                             >
                               Sign out
                             </button>
@@ -159,122 +116,109 @@ export default function Header() {
                   <div className="flex items-center space-x-4">
                     <Link
                       href="/auth/login"
-                      className="text-gray-500 hover:text-gray-700 text-sm font-medium"
+                      className="rounded-lg px-4 py-2 text-lg font-medium text-white/90 hover:text-white hover:underline"
                     >
                       Sign in
                     </Link>
                     <Link
                       href="/auth/register"
-                      className="bg-indigo-600 text-white px-3 py-1.5 rounded-md text-sm font-medium hover:bg-indigo-500"
+                      className="rounded-lg bg-white px-6 py-2 text-lg font-bold text-blue-600 shadow-lg hover:bg-blue-50"
                     >
                       Sign up
                     </Link>
                   </div>
                 )}
               </div>
-              <div className="-mr-2 flex items-center sm:hidden">
-                <Disclosure.Button className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+              <div className="-mr-2 flex md:hidden">
+                <Disclosure.Button className="inline-flex items-center justify-center rounded-md p-2 text-white hover:bg-white/20 focus:outline-none">
                   <span className="sr-only">Open main menu</span>
                   {open ? (
-                    <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
+                    <XMarkIcon className="block h-8 w-8" aria-hidden="true" />
                   ) : (
-                    <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
+                    <Bars3Icon className="block h-8 w-8" aria-hidden="true" />
                   )}
                 </Disclosure.Button>
               </div>
             </div>
           </div>
 
-          <Disclosure.Panel className="sm:hidden">
-            <div className="space-y-1 pb-3 pt-2">
-              {navigation.map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                  <Disclosure.Button
-                    key={item.name}
-                    as="a"
-                    href={item.href}
-                    className={classNames(
-                      isActive
-                        ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
-                        : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700',
-                      'block border-l-4 py-2 pl-3 pr-4 text-base font-medium'
-                    )}
-                  >
-                    {item.name}
-                  </Disclosure.Button>
-                );
-              })}
+          <Disclosure.Panel className="md:hidden">
+            <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
+              {navigation.map((item) => (
+                <Disclosure.Button
+                  key={item.name}
+                  as={Link}
+                  href={item.href}
+                  className={`block rounded-md px-3 py-2 text-base font-medium ${
+                    pathname === item.href
+                      ? 'bg-white/10 text-white'
+                      : 'text-white/80 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  {item.name}
+                </Disclosure.Button>
+              ))}
             </div>
-            <div className="border-t border-gray-200 pb-3 pt-4">
+            <div className="border-t border-white/20 pb-3 pt-4">
               {session?.user ? (
                 <>
-                  <div className="flex items-center px-4">
-                    {session.user.image ? (
-                      <div className="flex-shrink-0">
+                  <div className="flex items-center px-5">
+                    <div className="flex-shrink-0">
+                      {session.user.image ? (
                         <Image
-                          className="h-10 w-10 rounded-full"
+                          className="h-10 w-10 rounded-full border-2 border-white/30"
                           src={session.user.image}
                           alt=""
                           width={40}
                           height={40}
                         />
-                      </div>
-                    ) : (
-                      <div className="h-10 w-10 rounded-full bg-indigo-100 text-center flex items-center justify-center">
-                        <span className="text-indigo-800 font-medium">
-                          {session.user.name?.charAt(0).toUpperCase() || 'U'}
-                        </span>
-                      </div>
-                    )}
+                      ) : (
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
+                          <span className="text-xl font-bold text-white">
+                            {session.user.name?.charAt(0).toUpperCase() || 'U'}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                     <div className="ml-3">
-                      <div className="text-base font-medium text-gray-800">
+                      <div className="text-base font-medium text-white">
                         {session.user.name}
                       </div>
-                      <div className="text-sm font-medium text-gray-500">
+                      <div className="text-sm font-medium text-white/70">
                         {session.user.email}
                       </div>
                     </div>
                   </div>
-                  <div className="mt-3 space-y-1">
+                  <div className="mt-3 space-y-1 px-2">
                     <Disclosure.Button
-                      as="a"
+                      as={Link}
                       href="/dashboard"
-                      className="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+                      className="block rounded-md px-3 py-2 text-base font-medium text-white/80 hover:bg-white/10 hover:text-white"
                     >
                       Dashboard
                     </Disclosure.Button>
-                    {session.user.subscription !== 'PAID' && (
-                      <Disclosure.Button
-                        as="a"
-                        href="/pricing"
-                        className="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
-                      >
-                        Upgrade to Premium
-                      </Disclosure.Button>
-                    )}
                     <Disclosure.Button
                       as="button"
                       onClick={() => signOut({ callbackUrl: '/' })}
-                      className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+                      className="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-white/80 hover:bg-white/10 hover:text-white"
                     >
                       Sign out
                     </Disclosure.Button>
                   </div>
                 </>
               ) : (
-                <div className="mt-3 space-y-1">
+                <div className="mt-3 space-y-1 px-2">
                   <Disclosure.Button
-                    as="a"
+                    as={Link}
                     href="/auth/login"
-                    className="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+                    className="block rounded-md px-3 py-2 text-base font-medium text-white/80 hover:bg-white/10 hover:text-white"
                   >
                     Sign in
                   </Disclosure.Button>
                   <Disclosure.Button
-                    as="a"
+                    as={Link}
                     href="/auth/register"
-                    className="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+                    className="block rounded-md bg-white px-3 py-2 text-base font-medium text-blue-600 hover:bg-blue-50"
                   >
                     Sign up
                   </Disclosure.Button>
@@ -286,4 +230,4 @@ export default function Header() {
       )}
     </Disclosure>
   );
-} 
+}

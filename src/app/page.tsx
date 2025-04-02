@@ -1,225 +1,457 @@
-import Image from "next/image";
 import Link from 'next/link';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth-options';
+import Image from "next/image";
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
-  
+
   return (
-    <main className="flex flex-col items-center min-h-screen">
+    <main className="flex flex-col items-center min-h-screen overflow-hidden z-0">
       {/* Hero Section */}
-      <div className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
-        <div className="container mx-auto px-6 py-20 max-w-6xl">
-          <div className="flex flex-col md:flex-row items-center">
-            <div className="md:w-1/2 mb-10 md:mb-0">
-              <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6">
-                AI-Powered Content Generator for Digital Marketing
+      <div className="w-full bg-gradient-to-r from-purple-900 to-blue-800 text-white relative overflow-hidden z-0">
+        <div className="container mx-auto px-6 py-24 max-w-7xl relative z-10">
+          <div className="flex flex-col md:flex-row items-center gap-12">
+            <div className="md:w-1/2">
+              <h1 className="text-5xl md:text-6xl font-bold leading-tight mb-6">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400 animate-gradient">
+                  AI-Powered Ad Creation
+                </span>
               </h1>
-              <p className="text-xl mb-8 text-blue-100">
-                Create stunning digital content for your business in minutes. Upload images, add details, and our AI will generate platform-optimized visuals for digital signage and social media.
+              <p className="text-xl mb-8 text-white/90">
+                Generate stunning ads, social media posts, and marketing content in seconds with our cutting-edge AI platform.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 {session?.user ? (
-                  <Link href="/dashboard" className="bg-white text-blue-600 hover:bg-blue-50 font-semibold rounded-lg px-6 py-3 text-center transition-colors">
-                    Go to Dashboard
+                  <Link
+                    href="/dashboard"
+                    className="bg-white text-blue-600 hover:bg-blue-50 font-bold rounded-xl px-8 py-4 text-center transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <span>Go to Dashboard</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
                   </Link>
                 ) : (
                   <>
-                    <Link href="/auth/register" className="bg-white text-blue-600 hover:bg-blue-50 font-semibold rounded-lg px-6 py-3 text-center transition-colors">
-                      Start Free Trial
+                    <Link
+                      href="/auth/register"
+                      className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-bold rounded-xl px-8 py-4 text-center transition-all transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                    >
+                      <span>Start Free Trial</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                      </svg>
                     </Link>
-                    <Link href="/auth/login" className="bg-transparent border border-white text-white hover:bg-white/10 font-semibold rounded-lg px-6 py-3 text-center transition-colors">
-                      Sign In
+                    <Link
+                      href="/auth/login"
+                      className="bg-white/10 border-2 border-white/30 text-white font-bold rounded-xl px-8 py-4 text-center transition-all transform hover:scale-105 hover:bg-white/20 flex items-center justify-center gap-2"
+                    >
+                      <span>Sign In</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
+                      </svg>
                     </Link>
                   </>
                 )}
               </div>
-            </div>
-            <div className="md:w-1/2 flex justify-center">
-              <div className="relative w-full max-w-md h-80 md:h-96">
-                <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-lg shadow-xl overflow-hidden transform -rotate-6">
-                  <div className="w-full h-full bg-gradient-to-br from-pink-400 to-purple-500 opacity-90"></div>
+              <div className="mt-8 flex items-center gap-4">
+                <div className="flex -space-x-2">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="w-10 h-10 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-xs font-bold">
+                      {i === 4 ? '5K+' : `U${i}`}
+                    </div>
+                  ))}
                 </div>
-                <div className="absolute top-10 right-0 w-64 h-64 bg-white rounded-lg shadow-xl overflow-hidden transform rotate-6">
-                  <div className="w-full h-full bg-gradient-to-br from-yellow-400 to-orange-500 opacity-90"></div>
-                </div>
-                <div className="absolute top-20 left-10 w-64 h-64 bg-white rounded-lg shadow-xl overflow-hidden">
-                  <div className="w-full h-full bg-gradient-to-br from-blue-400 to-teal-500 opacity-90"></div>
-                </div>
+                <p className="text-sm text-white/80">Trusted by 5,000+ marketers worldwide</p>
               </div>
+            </div>
+            <div className="md:w-9/12 flex justify-center  rounded-[30px]">
+              <Image
+                src="https://images.unsplash.com/photo-1601315488950-3b5047998b38?q=80&w=3174&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                alt="AI Content Creation"
+                width={700}
+                height={600}
+                className="w-full h-auto animate-float rounded-[30px] object-cover"
+              />
             </div>
           </div>
         </div>
       </div>
 
       {/* Features Section */}
-      <div className="w-full py-16 bg-white">
-        <div className="container mx-auto px-6 max-w-6xl">
-          <h2 className="text-3xl font-bold text-center mb-12">Transform Your Marketing with AI</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow">
-              <div className="bg-blue-100 text-blue-600 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Platform Optimized</h3>
-              <p className="text-gray-600">Create content specifically tailored for digital signage, Instagram, and TikTok with the perfect dimensions and style.</p>
-            </div>
-            
-            <div className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow">
-              <div className="bg-purple-100 text-purple-600 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128Zm0 0a15.998 15.998 0 0 0 3.388-1.62m-5.043-.025a15.994 15.994 0 0 1 1.622-3.395m3.42 3.42a15.995 15.995 0 0 0 4.764-4.648l3.876-5.814a1.151 1.151 0 0 0-1.597-1.597L14.146 6.32a15.996 15.996 0 0 0-4.649 4.763m3.42 3.42a6.776 6.776 0 0 0-3.42-3.42" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Brand Consistent</h3>
-              <p className="text-gray-600">Maintain your brand identity with customized colors, logos, and messaging across all generated content.</p>
-            </div>
-            
-            <div className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow">
-              <div className="bg-green-100 text-green-600 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Time Saving</h3>
-              <p className="text-gray-600">Generate professional quality marketing materials in minutes instead of hours or days, saving time and resources.</p>
-            </div>
+      <div className="w-full py-20 bg-white">
+        <div className="container mx-auto px-6 max-w-7xl">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Supercharge Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600">Marketing</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Our AI platform transforms your ideas into high-performing marketing assets instantly.
+            </p>
           </div>
-        </div>
-      </div>
 
-      {/* How It Works Section */}
-      <div className="w-full py-16 bg-gray-50">
-        <div className="container mx-auto px-6 max-w-6xl">
-          <h2 className="text-3xl font-bold text-center mb-4">How It Works</h2>
-          <p className="text-gray-600 text-center mb-12 max-w-2xl mx-auto">Our simple three-step process makes creating professional marketing content easier than ever.</p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="flex flex-col items-center text-center">
-              <div className="bg-blue-600 text-white font-bold rounded-full w-12 h-12 flex items-center justify-center mb-4">1</div>
-              <h3 className="text-xl font-semibold mb-2">Upload</h3>
-              <p className="text-gray-600">Upload your product images and provide details like price, slogan, and brand colors.</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-2">
+              <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white p-4 rounded-2xl w-16 h-16 flex items-center justify-center mb-6">
+                <Image
+                  src="https://illustrations.popsy.co/amber/designer.svg"
+                  alt="Platform Optimized"
+                  width={40}
+                  height={40}
+                />
+              </div>
+              <h3 className="text-2xl font-bold mb-3 text-gray-900">Platform Optimized</h3>
+              <p className="text-gray-600">
+                Perfectly sized content for Instagram, TikTok, Facebook, and digital signage with automatic formatting.
+              </p>
             </div>
-            
-            <div className="flex flex-col items-center text-center">
-              <div className="bg-blue-600 text-white font-bold rounded-full w-12 h-12 flex items-center justify-center mb-4">2</div>
-              <h3 className="text-xl font-semibold mb-2">Generate</h3>
-              <p className="text-gray-600">Our AI creates platform-specific marketing visuals optimized for your target audience.</p>
+
+            <div className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-2">
+              <div className="bg-gradient-to-r from-pink-500 to-purple-500 text-white p-4 rounded-2xl w-16 h-16 flex items-center justify-center mb-6">
+                <Image
+                  src="https://illustrations.popsy.co/amber/designer.svg"
+                  alt="Brand Consistent"
+                  width={40}
+                  height={40}
+                />
+              </div>
+              <h3 className="text-2xl font-bold mb-3 text-gray-900">Brand Consistent</h3>
+              <p className="text-gray-600">
+                Maintain your brand identity with custom colors, fonts, and logos across all generated content.
+              </p>
             </div>
-            
-            <div className="flex flex-col items-center text-center">
-              <div className="bg-blue-600 text-white font-bold rounded-full w-12 h-12 flex items-center justify-center mb-4">3</div>
-              <h3 className="text-xl font-semibold mb-2">Export</h3>
-              <p className="text-gray-600">Download or directly share your generated content to social media platforms.</p>
+
+            <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-2">
+              <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white p-4 rounded-2xl w-16 h-16 flex items-center justify-center mb-6">
+                <Image
+                  src="https://illustrations.popsy.co/amber/designer.svg"
+                  alt="Time Saving"
+                  width={40}
+                  height={40}
+                />
+              </div>
+              <h3 className="text-2xl font-bold mb-3 text-gray-900">Time Saving</h3>
+              <p className="text-gray-600">
+                Create professional ads in minutes instead of days. Our AI handles the heavy lifting.
+              </p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Pricing Section */}
-      <div className="w-full py-16 bg-white">
-        <div className="container mx-auto px-6 max-w-6xl">
-          <h2 className="text-3xl font-bold text-center mb-12">Choose Your Plan</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow p-8">
-              <div className="mb-4">
-                <h3 className="text-2xl font-bold">Free Plan</h3>
-                <p className="text-gray-600">Perfect for trying out the service</p>
-              </div>
-              
+      <div className="w-full py-20 bg-gradient-to-r from-purple-900 to-blue-800">
+        <div className="container mx-auto px-6 max-w-7xl">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-300 mb-4">
+              Simple, <span className="text-transparent bg-clip-text bg-white">Transparent</span> Pricing
+            </h2>
+            <p className="text-xl text-gray-200 max-w-3xl mx-auto">
+              Choose the plan that fits your business needs
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl mx-auto">
+            <div className="bg-white border-2 border-gray-200 rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-2 p-10">
               <div className="mb-6">
-                <p className="text-4xl font-bold">$0<span className="text-gray-500 text-lg font-normal">/month</span></p>
+                <h3 className="text-2xl font-bold text-gray-900">Starter</h3>
+                <p className="text-gray-600">Perfect for small businesses and individuals</p>
               </div>
-              
-              <ul className="mb-8 space-y-3">
-                <li className="flex items-center">
-                  <svg className="h-5 w-5 text-green-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+
+              <div className="mb-8">
+                <p className="text-5xl font-bold text-gray-900">
+                  $0<span className="text-gray-500 text-xl font-normal">/month</span>
+                </p>
+              </div>
+
+              <ul className="mb-10 space-y-4">
+                <li className="flex items-start">
+                  <svg className="h-6 w-6 text-green-500 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>1 generation per day</span>
+                  <span className="text-gray-700">5 ad generations per week</span>
                 </li>
-                <li className="flex items-center">
-                  <svg className="h-5 w-5 text-green-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <li className="flex items-start">
+                  <svg className="h-6 w-6 text-green-500 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>Basic platforms support</span>
+                  <span className="text-gray-700">Basic social platforms</span>
                 </li>
-                <li className="flex items-center">
-                  <svg className="h-5 w-5 text-green-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <li className="flex items-start">
+                  <svg className="h-6 w-6 text-green-500 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>Standard image quality</span>
+                  <span className="text-gray-700">Standard resolution</span>
                 </li>
               </ul>
-              
-              <Link href="/auth/register" className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg px-4 py-3 text-center transition-colors">
-                Start Free
+
+              <Link
+                href="/auth/register"
+                className="block w-full bg-gray-900 hover:bg-gray-800 text-white font-bold rounded-xl px-6 py-4 text-center transition-all"
+              >
+                Get Started Free
               </Link>
             </div>
-            
-            <div className="bg-blue-600 text-white rounded-xl shadow-md p-8 relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-blue-700 text-white text-xs font-bold px-3 py-1 uppercase">Popular</div>
-              
-              <div className="mb-4">
-                <h3 className="text-2xl font-bold">Premium Plan</h3>
-                <p className="text-blue-200">For businesses with regular needs</p>
+
+            <div className="bg-gradient-to-br from-purple-600 to-blue-600 text-white rounded-2xl shadow-xl p-10 relative overflow-hidden transform hover:-translate-y-2">
+              <div className="absolute top-6 right-6 bg-yellow-400 text-purple-900 text-sm font-bold px-4 py-1 rounded-full uppercase">
+                Most Popular
               </div>
-              
+
               <div className="mb-6">
-                <p className="text-4xl font-bold">$19.99<span className="text-blue-200 text-lg font-normal">/month</span></p>
+                <h3 className="text-2xl font-bold">Pro</h3>
+                <p className="text-blue-100">For growing businesses and agencies</p>
               </div>
-              
-              <ul className="mb-8 space-y-3">
-                <li className="flex items-center">
-                  <svg className="h-5 w-5 text-blue-300 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+
+              <div className="mb-8">
+                <p className="text-5xl font-bold">
+                  $29<span className="text-blue-200 text-xl font-normal">/month</span>
+                </p>
+              </div>
+
+              <ul className="mb-10 space-y-4">
+                <li className="flex items-start">
+                  <svg className="h-6 w-6 text-yellow-300 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>5 generations per day</span>
+                  <span>Unlimited ad generations</span>
                 </li>
-                <li className="flex items-center">
-                  <svg className="h-5 w-5 text-blue-300 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <li className="flex items-start">
+                  <svg className="h-6 w-6 text-yellow-300 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>All platforms supported</span>
+                  <span>All platforms + digital signage</span>
                 </li>
-                <li className="flex items-center">
-                  <svg className="h-5 w-5 text-blue-300 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <li className="flex items-start">
+                  <svg className="h-6 w-6 text-yellow-300 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>High quality output</span>
+                  <span>High resolution + transparent PNG</span>
                 </li>
-                <li className="flex items-center">
-                  <svg className="h-5 w-5 text-blue-300 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <li className="flex items-start">
+                  <svg className="h-6 w-6 text-yellow-300 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>Priority processing</span>
+                  <span>Advanced analytics</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="h-6 w-6 text-yellow-300 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Priority support</span>
                 </li>
               </ul>
-              
-              <Link href="/auth/register?plan=paid" className="block w-full bg-white text-blue-600 hover:bg-blue-50 font-semibold rounded-lg px-4 py-3 text-center transition-colors">
-                Get Premium
+
+              <Link
+                href="/auth/register?plan=pro"
+                className="block w-full bg-white text-blue-600 hover:bg-blue-50 font-bold rounded-xl px-6 py-4 text-center transition-all shadow-lg"
+              >
+                Upgrade to Pro
               </Link>
             </div>
           </div>
         </div>
       </div>
 
+
+      {/* How It Works Section */}
+      <div className="w-full py-20 bg-gray-50">
+        <div className="container mx-auto px-6 max-w-7xl">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              How <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600">AdGenius</span> Works
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Three simple steps to create stunning marketing content
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div className="flex flex-col items-center text-center">
+              <div className="relative mb-8">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full blur-md opacity-30"></div>
+                <div className="relative bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-full w-20 h-20 flex items-center justify-center text-3xl shadow-lg">
+                  1
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold mb-3 text-gray-900">Upload & Describe</h3>
+              <p className="text-gray-600">
+                Add your product images and describe your campaign goals, target audience, and brand style.
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center text-center">
+              <div className="relative mb-8">
+                <div className="absolute inset-0 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full blur-md opacity-30"></div>
+                <div className="relative bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-full w-20 h-20 flex items-center justify-center text-3xl shadow-lg">
+                  2
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold mb-3 text-gray-900">AI Magic</h3>
+              <p className="text-gray-600">
+                Our AI generates multiple ad variations optimized for engagement and conversions.
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center text-center">
+              <div className="relative mb-8">
+                <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-blue-500 rounded-full blur-md opacity-30"></div>
+                <div className="relative bg-gradient-to-r from-green-500 to-blue-600 text-white font-bold rounded-full w-20 h-20 flex items-center justify-center text-3xl shadow-lg">
+                  3
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold mb-3 text-gray-900">Publish & Track</h3>
+              <p className="text-gray-600">
+                Download or publish directly to social platforms and monitor performance analytics.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Testimonials */}
+      <div className="w-full py-20  bg-gradient-to-r from-purple-900 to-blue-800">
+        <div className="container mx-auto px-6 max-w-7xl">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-200 mb-4">
+              What Our <span className="text-transparent bg-clip-text bg-white">Clients</span> Say
+            </h2>
+            <p className="text-xl text-gray-200 max-w-3xl mx-auto">
+              Don't just take our word for it - hear from our satisfied customers
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                name: "Sarah Johnson",
+                role: "Marketing Director, TechStart",
+                quote: "AdGenius has cut our content creation time by 80%. The AI suggestions are incredibly on-brand and effective.",
+                avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=688&q=80",
+                rating: 5
+              },
+              {
+                name: "Michael Chen",
+                role: "Founder, EcomPro",
+                quote: "Our conversion rates increased by 40% after switching to AdGenius. The platform pays for itself.",
+                avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80",
+                rating: 5
+              },
+              {
+                name: "Emma Rodriguez",
+                role: "Social Media Manager, Fashionista",
+                quote: "I can now create a month's worth of content in just a few hours. The platform is a game-changer!",
+                avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=761&q=80",
+                rating: 4
+              }
+            ].map((testimonial, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-lg p-8 border border-gray-100 hover:shadow-xl transition-shadow">
+                <div className="flex items-center mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <svg
+                      key={i}
+                      className={`w-5 h-5 ${i < testimonial.rating ? 'text-yellow-400' : 'text-gray-300'}`}
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <p className="text-gray-600 italic mb-6">"{testimonial.quote}"</p>
+                <div className="flex items-center">
+                  <div className="relative h-12 w-12 rounded-full overflow-hidden mr-4">
+                    <Image
+                      src={testimonial.avatar}
+                      alt={testimonial.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-900">{testimonial.name}</h4>
+                    <p className="text-sm text-gray-600">{testimonial.role}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+
+
       {/* CTA Section */}
-      <div className="w-full py-16 bg-gradient-to-r from-purple-600 to-indigo-700 text-white">
-        <div className="container mx-auto px-6 max-w-4xl text-center">
-          <h2 className="text-3xl font-bold mb-6">Ready to transform your marketing content?</h2>
-          <p className="text-xl mb-8 text-purple-100 max-w-2xl mx-auto">Join thousands of businesses that use our AI-powered platform to create stunning visuals in minutes.</p>
-          
-          <Link href="/auth/register" className="inline-block bg-white text-indigo-600 hover:bg-indigo-50 font-semibold rounded-lg px-8 py-4 text-lg transition-colors">
-            Start Creating Now
-          </Link>
+      <div className="w-full py-24 text-black bg-white">
+        <div className="container mx-auto px-6 max-w-5xl text-center">
+          <h2 className="text-4xl md:text-5xl font-bold mb-8">
+            Ready to <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-pink-400">transform</span> your marketing?
+          </h2>
+          <p className="text-xl mb-10 max-w-3xl mx-auto">
+            Join thousands of businesses creating stunning ads and content with AdGenius AI.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/auth/register"
+              className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-bold rounded-xl px-10 py-5 text-lg text-center transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+            >
+              Start Free Trial
+            </Link>
+            <Link
+              href="/demo"
+              className="bg-white/10 border-2 border-black/30  font-bold rounded-xl px-10 py-5 text-lg text-center transition-all transform hover:scale-105 hover:bg-white/20"
+            >
+              See Live Demo
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* FAQ Section */}
+      <div className="w-full py-20  bg-gradient-to-r from-purple-900 to-blue-800">
+        <div className="container mx-auto px-6 max-w-5xl">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-200 mb-4">
+              Frequently Asked <span className="text-transparent bg-clip-text bg-white">Questions</span>
+            </h2>
+            <p className="text-xl text-gray-200 max-w-3xl mx-auto">
+              Everything you need to know about AdGenius
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            {[
+              {
+                question: "How does the AI generate ads?",
+                answer: "Our AI analyzes thousands of high-performing ads across industries to create optimized content tailored to your brand. It considers your inputs, target audience, and platform specifications to generate the most effective creatives."
+              },
+              {
+                question: "Can I customize the generated ads?",
+                answer: "Absolutely! All generated ads are fully editable. You can tweak text, colors, layouts, and more before downloading or publishing."
+              },
+              {
+                question: "What image formats are supported?",
+                answer: "We support JPG, PNG, and WebP formats for uploads. Downloads are available in JPG, PNG (including transparent), and MP4 for video ads."
+              },
+              {
+                question: "Is there a limit to how many ads I can generate?",
+                answer: "The free plan includes 5 generations per week. Pro and Enterprise plans offer unlimited generations."
+              },
+              {
+                question: "How do I cancel my subscription?",
+                answer: "You can cancel anytime from your account settings. There are no cancellation fees, and you'll retain access until the end of your billing period."
+              }
+            ].map((faq, index) => (
+              <div key={index} className="bg-gray-50 rounded-xl p-6 hover:bg-gray-100 transition-colors">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{faq.question}</h3>
+                <p className="text-gray-600">{faq.answer}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </main>
   );
-}
+};
