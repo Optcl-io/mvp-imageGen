@@ -98,9 +98,9 @@ export const authOptions: NextAuthOptions = {
         // Only refresh from database if it's been at least 5 minutes since last refresh
         // or if there's no lastRefreshed timestamp
         const now = Date.now();
-        const fiveMinutes = 5 * 60 * 1000;
+        const tenMinutes = 10 * 60 * 1000; // Increase to 10 minutes
         
-        if (!token.lastRefreshed || (now - token.lastRefreshed) > fiveMinutes) {
+        if (!token.lastRefreshed || (now - token.lastRefreshed) > tenMinutes) {
           try {
             // Get the latest user data from the database
             const latestUser = await prisma.user.findUnique({
@@ -109,11 +109,15 @@ export const authOptions: NextAuthOptions = {
             });
             
             if (latestUser) {
-              // Update token with latest user data
-              token.subscription = latestUser.subscription;
-              token.role = latestUser.role;
+              // Only update token if subscription status has actually changed
+              if (token.subscription !== latestUser.subscription || token.role !== latestUser.role) {
+                token.subscription = latestUser.subscription;
+                token.role = latestUser.role;
+                console.log(`Token refreshed for user ${token.id}, subscription: ${token.subscription}`);
+              }
+              
+              // Always update the timestamp even if data didn't change
               token.lastRefreshed = now;
-              console.log(`Token refreshed for user ${token.id}, subscription: ${token.subscription}`);
             }
           } catch (error) {
             console.error('Error refreshing user data:', error);

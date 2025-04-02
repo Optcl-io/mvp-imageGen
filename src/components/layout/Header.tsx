@@ -8,6 +8,9 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useSession, signOut } from 'next-auth/react';
 import Image from 'next/image';
 
+// Store refresh state globally to prevent multiple components from refreshing
+const globalRefreshed = { current: false };
+
 const navigation = [
   { name: 'Home', href: '/' },
   { name: 'Dashboard', href: '/dashboard' },
@@ -19,22 +22,18 @@ function classNames(...classes: string[]) {
 }
 
 export default function Header() {
-  const { data: session, update: updateSession } = useSession();
+  const { data: session } = useSession();
   const pathname = usePathname();
-  const sessionRefreshed = useRef(false);
+  
+  // Only refresh when visiting the dashboard or pricing pages
+  // and only if the global refresh hasn't happened yet
+  const shouldRefreshPaths = ['/dashboard', '/pricing'];
+  const needsRefresh = useRef(
+    !globalRefreshed.current && shouldRefreshPaths.includes(pathname)
+  );
 
-  // Refresh the session only once when the component mounts
-  useEffect(() => {
-    // This ensures we have the latest subscription status, but only refreshes once
-    const refreshSession = async () => {
-      if (!sessionRefreshed.current && session?.user) {
-        await updateSession();
-        sessionRefreshed.current = true;
-      }
-    };
-    
-    refreshSession();
-  }, [session, updateSession]);
+  // No more automatic session refresh in the component
+  // This prevents the excessive CSRF and session API calls
 
   return (
     <Disclosure as="nav" className="bg-white shadow">

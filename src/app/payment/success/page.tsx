@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircleIcon } from '@heroicons/react/24/outline';
@@ -13,34 +13,46 @@ export default function PaymentSuccessPage() {
   const sessionId = searchParams.get('session_id');
   const [isVerifying, setIsVerifying] = useState(true);
   const [attempts, setAttempts] = useState(0);
+  const [hasAttemptedRefresh, setHasAttemptedRefresh] = useState(false);
 
-  useEffect(() => {
-    // Update the session to reflect the new subscription status
-    const verifySubscription = async () => {
-      if (session && !isRefreshing) {
-        // Try to refresh the session with force=true to bypass the refresh rate limit
-        const success = await refreshSession(true);
+  // Use callback to prevent excessive retries
+  const verifySubscription = useCallback(async () => {
+    if (!session?.user || isRefreshing || hasAttemptedRefresh) return;
+
+    setHasAttemptedRefresh(true);
+
+    try {
+      // Force refresh session (only once)
+      await refreshSession(true);
         
-        if (success && isSubscribed) {
-          setIsVerifying(false);
-          // Redirect to dashboard after 3 seconds
-          setTimeout(() => {
-            router.push('/dashboard');
-          }, 3000);
-        } else if (attempts < 5) {
-          // Try again in 2 seconds, up to 5 times (10 seconds total)
-          setTimeout(() => {
-            setAttempts(prev => prev + 1);
-          }, 2000);
-        } else {
-          // Give up after 5 attempts and just show success
-          setIsVerifying(false);
-        }
+      if (isSubscribed) {
+        setIsVerifying(false);
+        // Redirect to dashboard after success
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 3000);
+      } else if (attempts < 2) {
+        // Limited retry attempts
+        setTimeout(() => {
+          setAttempts(prev => prev + 1);
+          setHasAttemptedRefresh(false);
+        }, 3000);
+      } else {
+        // Stop trying after a few attempts
+        setIsVerifying(false);
       }
-    };
+    } catch (err) {
+      setIsVerifying(false);
+      console.error("Error verifying subscription:", err);
+    }
+  }, [session, refreshSession, isSubscribed, router, attempts, isRefreshing, hasAttemptedRefresh]);
 
+  // Only run verification once when component mounts or after attempt retry
+  useEffect(() => {
+    if (!isVerifying || isRefreshing) return;
+    
     verifySubscription();
-  }, [session, refreshSession, isSubscribed, router, attempts, isRefreshing]);
+  }, [verifySubscription, isVerifying, isRefreshing, attempts]);
 
   // If no session ID is provided, redirect immediately
   useEffect(() => {
