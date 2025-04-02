@@ -3,54 +3,111 @@ import { headers } from 'next/headers';
 import { stripe } from '@/lib/stripe/stripe-client';
 import { prisma } from '@/lib/db/prisma';
 import { Subscription } from '@/lib/db/types';
+import Stripe from 'stripe';
 
 // Handling Stripe webhook events
 export async function POST(req: NextRequest) {
-  const body = await req.text();
-  const headersList = headers();
-  const signature = headersList.get('stripe-signature');
-
-  if (!signature || !process.env.STRIPE_WEBHOOK_SECRET) {
-    return NextResponse.json({ error: 'Missing signature or webhook secret' }, { status: 400 });
-  }
-
-  let event;
-
   try {
-    event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
-  } catch (err) {
-    console.error('Webhook signature verification failed:', err);
-    return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 });
-  }
+    const body = await req.text();
+    // Use the raw headers from the request instead
+    const signature = req.headers.get('stripe-signature');
 
-  // Handle the event
-  try {
+    if (!signature || !process.env.STRIPE_WEBHOOK_SECRET) {
+      console.error('Missing signature or webhook secret');
+      return NextResponse.json({ error: 'Missing signature or webhook secret' }, { status: 400 });
+    }
+
+    let event;
+
+    try {
+      event = stripe.webhooks.constructEvent(
+        body,
+        signature,
+        process.env.STRIPE_WEBHOOK_SECRET
+      );
+      console.log(`Webhook received: ${event.type}`);
+    } catch (err) {
+      console.error('Webhook signature verification failed:', err);
+      return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 });
+    }
+
+    // Handle the event
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object;
+        console.log('Session completed:', session.id);
         
         // Extract customer information
         const userId = session.client_reference_id;
         const subscriptionId = session.subscription;
         
+        if (!userId) {
+          console.error('No userId found in session:', session.id);
+          return NextResponse.json({ error: 'No userId in session' }, { status: 400 });
+        }
+
+        console.log(`Processing checkout for user ${userId}, subscription ${subscriptionId}`);
+        
         if (userId && subscriptionId) {
-          // Retrieve the subscription to get its status
-          const subscription = await stripe.subscriptions.retrieve(subscriptionId as string);
-          
-          if (subscription.status === 'active') {
-            // Update user's subscription status in the database
+          try {
+            // Retrieve the subscription to get its status
+            const subscription = await stripe.subscriptions.retrieve(subscriptionId as string);
+            console.log(`Subscription status: ${subscription.status}`);
+            
+            // Update user's subscription status in the database, even if not yet active
+            // It will be updated again when the subscription is updated
             await prisma.user.update({
               where: { id: userId },
               data: {
-                subscription: Subscription.PAID,
+                subscription: subscription.status === 'active' ? Subscription.PAID : Subscription.FREE,
+                stripeSubscriptionId: subscriptionId as string,
               },
             });
             
-            console.log(`User ${userId} upgraded to paid subscription`);
+            console.log(`User ${userId} subscription updated based on checkout`);
+          } catch (error) {
+            console.error('Error retrieving subscription:', error);
+          }
+        } else if (userId && session.mode === 'payment') {
+          // One-time payment (if implemented)
+          await prisma.user.update({
+            where: { id: userId },
+            data: {
+              subscription: Subscription.PAID,
+            },
+          });
+          console.log(`User ${userId} upgraded to paid via one-time payment`);
+        }
+        break;
+      }
+      
+      case 'invoice.payment_succeeded': {
+        const invoice = event.data.object as any; // Cast to any to access properties
+        const subscriptionId = invoice.subscription;
+        const customerId = invoice.customer;
+        
+        console.log(`Invoice paid for subscription ${subscriptionId}`);
+        
+        if (subscriptionId && customerId) {
+          try {
+            // Find user by Stripe customerId or via subscription metadata
+            const subscription = await stripe.subscriptions.retrieve(subscriptionId as string);
+            const userId = subscription.metadata?.userId;
+            
+            if (userId) {
+              await prisma.user.update({
+                where: { id: userId },
+                data: {
+                  subscription: Subscription.PAID,
+                  stripeSubscriptionId: subscriptionId as string,
+                },
+              });
+              console.log(`User ${userId} subscription updated to PAID after invoice payment`);
+            } else {
+              console.error('No userId found in subscription metadata');
+            }
+          } catch (error) {
+            console.error('Error processing invoice payment:', error);
           }
         }
         break;
@@ -59,19 +116,25 @@ export async function POST(req: NextRequest) {
       case 'customer.subscription.updated': {
         const subscription = event.data.object;
         const userId = subscription.metadata?.userId;
+        const subscriptionStatus = subscription.status;
+        
+        console.log(`Subscription ${subscription.id} updated to ${subscriptionStatus}`);
         
         if (userId) {
           // If subscription is active, set user to PAID, otherwise FREE
-          const subscriptionStatus = subscription.status === 'active' ? Subscription.PAID : Subscription.FREE;
+          const userSubscriptionStatus = subscriptionStatus === 'active' ? Subscription.PAID : Subscription.FREE;
           
           await prisma.user.update({
             where: { id: userId },
             data: {
-              subscription: subscriptionStatus,
+              subscription: userSubscriptionStatus,
+              stripeSubscriptionId: subscription.id,
             },
           });
           
-          console.log(`User ${userId} subscription updated to ${subscriptionStatus}`);
+          console.log(`User ${userId} subscription updated to ${userSubscriptionStatus}`);
+        } else {
+          console.error('No userId found in subscription metadata:', subscription.id);
         }
         break;
       }
@@ -80,16 +143,21 @@ export async function POST(req: NextRequest) {
         const subscription = event.data.object;
         const userId = subscription.metadata?.userId;
         
+        console.log(`Subscription ${subscription.id} deleted`);
+        
         if (userId) {
           // Set user back to FREE tier
           await prisma.user.update({
             where: { id: userId },
             data: {
               subscription: Subscription.FREE,
+              stripeSubscriptionId: null,
             },
           });
           
           console.log(`User ${userId} downgraded to free subscription`);
+        } else {
+          console.error('No userId found in deleted subscription metadata');
         }
         break;
       }

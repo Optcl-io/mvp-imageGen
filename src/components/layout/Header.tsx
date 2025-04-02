@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment } from 'react';
+import { Fragment, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
@@ -19,8 +19,18 @@ function classNames(...classes: string[]) {
 }
 
 export default function Header() {
-  const { data: session } = useSession();
+  const { data: session, update: updateSession } = useSession();
   const pathname = usePathname();
+
+  // Refresh the session when the component mounts
+  useEffect(() => {
+    // This ensures we have the latest subscription status
+    const refreshSession = async () => {
+      await updateSession();
+    };
+    
+    refreshSession();
+  }, [updateSession]);
 
   return (
     <Disclosure as="nav" className="bg-white shadow">

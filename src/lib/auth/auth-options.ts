@@ -81,12 +81,34 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
+      // Initial sign in
       if (user) {
         token.id = user.id;
         token.role = user.role;
         token.subscription = user.subscription;
       }
+      
+      // Refresh the subscription status on token updates
+      if (trigger === 'update') {
+        try {
+          // Get the latest user data from the database
+          const latestUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { subscription: true, role: true },
+          });
+          
+          if (latestUser) {
+            // Update token with latest user data
+            token.subscription = latestUser.subscription;
+            token.role = latestUser.role;
+            console.log(`Token refreshed for user ${token.id}, subscription: ${token.subscription}`);
+          }
+        } catch (error) {
+          console.error('Error refreshing user data:', error);
+        }
+      }
+      
       return token;
     },
     async session({ session, token }) {

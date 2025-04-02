@@ -37,6 +37,9 @@ export async function createCheckoutSession({
     throw new Error('Price ID is required');
   }
 
+  // Get the base URL from environment
+  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+
   const checkoutSession = await stripe.checkout.sessions.create({
     mode: 'subscription',
     payment_method_types: ['card'],
@@ -48,10 +51,15 @@ export async function createCheckoutSession({
     ],
     customer_email: customerEmail,
     client_reference_id: userId,
-    success_url: `${process.env.NEXTAUTH_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${process.env.NEXTAUTH_URL}/payment/canceled`,
+    success_url: `${baseUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${baseUrl}/payment/canceled`,
     metadata: {
       userId,
+    },
+    subscription_data: {
+      metadata: {
+        userId,
+      },
     },
   });
 
