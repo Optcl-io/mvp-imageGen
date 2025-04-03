@@ -9,6 +9,7 @@ A SaaS platform that leverages OpenAI's image generation technology to create ta
 - **Image Upload**: Securely upload and store product images
 - **AI Generation**: Create platform-specific marketing content using OpenAI
 - **Image Transformation**: Transform existing images with AI using text prompts
+- **ChatGPT Integration**: Automated browser-based generation using GPT-4o's visual capabilities
 - **Export Options**: Download or share generated content directly to social media
 - **Feedback System**: Refine generated assets based on user feedback
 
@@ -19,7 +20,8 @@ A SaaS platform that leverages OpenAI's image generation technology to create ta
 - **Database**: PostgreSQL with Prisma ORM
 - **Authentication**: NextAuth.js with JWT
 - **Image Processing**: Sharp for image optimization
-- **AI Integration**: OpenAI DALL-E 3 for image generation and transformation
+- **AI Integration**: OpenAI DALL-E 3 for API-based generation and ChatGPT with Python/Playwright for browser automation
+- **Automation**: Python with Playwright for ChatGPT UI interaction
 
 ## Getting Started
 
@@ -27,6 +29,7 @@ A SaaS platform that leverages OpenAI's image generation technology to create ta
 
 - Node.js (v16+)
 - PostgreSQL database
+- Python 3.8+ (for ChatGPT automation)
 
 ### Environment Setup
 
@@ -49,6 +52,10 @@ A SaaS platform that leverages OpenAI's image generation technology to create ta
 
    # OpenAI API Key
    OPENAI_API_KEY="your-openai-api-key"
+   
+   # OpenAI Account for ChatGPT Automation
+   OPENAI_EMAIL="your-openai-account-email"
+   OPENAI_PASSWORD="your-openai-account-password"
 
    # File Upload Configuration
    UPLOAD_DIR="./public/uploads"
@@ -70,6 +77,12 @@ npx prisma generate
 
 # Run database migrations
 npx prisma migrate dev
+
+# Set up Python environment for ChatGPT automation
+conda create -n chatgpt-automation python=3.10
+conda activate chatgpt-automation
+pip install playwright
+playwright install chromium
 
 # Start development server
 npm run dev
@@ -95,7 +108,9 @@ npx prisma db seed
 .
 ├── prisma/                # Database schema and migrations
 ├── public/                # Static assets
-│   └── uploads/           # User uploaded images
+│   ├── uploads/           # User uploaded images
+│   └── generated_images/  # ChatGPT-generated images
+├── scripts/               # Python automation scripts
 ├── src/
 │   ├── app/               # Next.js app directory
 │   │   ├── api/           # API routes
@@ -111,6 +126,7 @@ npx prisma db seed
 │       ├── db/            # Database utilities
 │       ├── openai/        # OpenAI integration
 │       └── utils/         # General utilities
+├── temp/                  # Temporary files for processing
 ├── .env                   # Environment variables
 └── next.config.js         # Next.js configuration
 ```
@@ -135,6 +151,21 @@ This feature utilizes OpenAI's DALL-E 3 model to produce high-quality image tran
 6. Click "Transform Image"
 
 **Note:** Image transformations count toward your daily generation limit based on your subscription tier.
+
+### ChatGPT Automation
+
+The platform includes browser automation to use ChatGPT's image generation capabilities:
+
+1. The system uses Python with Playwright to control a browser
+2. When a user generates content, the system:
+   - Logs into ChatGPT using your OpenAI account credentials
+   - Uploads the product image to ChatGPT
+   - Sends a prompt based on the user's product details
+   - Waits for the AI to generate an image
+   - Downloads and saves the result
+   - Updates the database with the image URL
+
+For detailed setup instructions, see [CHATGPT_AUTOMATION.md](CHATGPT_AUTOMATION.md).
 
 ## License
 

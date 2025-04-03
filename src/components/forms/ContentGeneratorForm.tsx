@@ -115,7 +115,8 @@ export default function ContentGeneratorForm({
     setGenerationError('');
 
     try {
-      const response = await fetch('/api/generation', {
+      // Use the ChatGPT generation endpoint
+      const response = await fetch('/api/chatgpt-generation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
