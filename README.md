@@ -8,6 +8,7 @@ A SaaS platform that leverages OpenAI's image generation technology to create ta
 - **Subscription Plans**: Free tier (1 generation per day) and paid tier (5 generations per day)
 - **Image Upload**: Securely upload and store product images
 - **AI Generation**: Create platform-specific marketing content using OpenAI
+- **Image Transformation**: Transform existing images with AI using text prompts
 - **Export Options**: Download or share generated content directly to social media
 - **Feedback System**: Refine generated assets based on user feedback
 
@@ -18,7 +19,7 @@ A SaaS platform that leverages OpenAI's image generation technology to create ta
 - **Database**: PostgreSQL with Prisma ORM
 - **Authentication**: NextAuth.js with JWT
 - **Image Processing**: Sharp for image optimization
-- **AI Integration**: OpenAI GPT-4o for image generation
+- **AI Integration**: OpenAI DALL-E 3 for image generation and transformation
 
 ## Getting Started
 
@@ -98,6 +99,7 @@ npx prisma db seed
 ├── src/
 │   ├── app/               # Next.js app directory
 │   │   ├── api/           # API routes
+│   │   │   └── ai/        # AI-related API endpoints
 │   │   ├── auth/          # Authentication pages
 │   │   └── dashboard/     # User dashboard
 │   ├── components/        # React components
@@ -112,6 +114,27 @@ npx prisma db seed
 ├── .env                   # Environment variables
 └── next.config.js         # Next.js configuration
 ```
+
+## Feature Guides
+
+### Image-to-Image Transformation
+
+The platform offers an AI-powered image transformation feature that allows users to:
+
+1. Upload a source image
+2. Provide a text prompt describing the desired transformation
+3. Generate a new image based on the source image and prompt
+
+This feature utilizes OpenAI's DALL-E 3 model to produce high-quality image transformations. To use this feature:
+
+1. Navigate to the Dashboard
+2. Select the "Image Transformation" tab
+3. Upload a source image
+4. Enter a detailed prompt describing how you want to transform the image
+5. Select the target platform (Instagram, TikTok, etc.)
+6. Click "Transform Image"
+
+**Note:** Image transformations count toward your daily generation limit based on your subscription tier.
 
 ## License
 
