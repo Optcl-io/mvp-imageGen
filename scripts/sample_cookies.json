@@ -1,0 +1,32 @@
+[
+  {
+    "name": "__Secure-next-auth.session-token",
+    "value": "your-session-token-value-here",
+    "domain": ".openai.com",
+    "path": "/",
+    "expires": -1,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "puid",
+    "value": "your-puid-value-here",
+    "domain": ".openai.com",
+    "path": "/",
+    "expires": -1,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "cf_clearance",
+    "value": "your-cf-clearance-value-here",
+    "domain": ".openai.com",
+    "path": "/",
+    "expires": -1,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  }
+] 

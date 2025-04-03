@@ -23,14 +23,40 @@ class ChatGPTImageGenerator:
         # Load cookies if provided
         if self.cookies_file and os.path.exists(self.cookies_file):
             try:
+                print(f"Attempting to load cookies from {self.cookies_file}")
                 with open(self.cookies_file, 'r') as f:
-                    cookies = json.load(f)
+                    cookies_content = f.read()
+                    print(f"Cookie file size: {len(cookies_content)} bytes")
+                    if not cookies_content.strip():
+                        print("Warning: Cookie file is empty")
+                        return self
+                        
+                    cookies = json.loads(cookies_content)
                 
+                if not isinstance(cookies, list):
+                    print(f"Error: Cookies file does not contain a list. Found {type(cookies)} instead")
+                    return self
+                    
                 print(f"Loaded {len(cookies)} cookies from {self.cookies_file}")
+                
+                # Check if cookies have correct format
+                for i, cookie in enumerate(cookies):
+                    if not isinstance(cookie, dict) or 'name' not in cookie or 'value' not in cookie:
+                        print(f"Warning: Cookie at index {i} does not have required fields (name/value)")
+                        continue
+                
                 self.context.add_cookies(cookies)
                 print("Added cookies to browser context")
+            except json.JSONDecodeError as e:
+                print(f"Error parsing cookies file as JSON: {str(e)}")
+                print(f"First 100 chars of file: {cookies_content[:100]}...")
             except Exception as e:
                 print(f"Error loading cookies: {str(e)}")
+                print(f"Cookie file path: {os.path.abspath(self.cookies_file)}")
+                if hasattr(e, 'traceback'):
+                    print(f"Traceback: {e.traceback}")
+        elif self.cookies_file:
+            print(f"Cookie file not found at path: {os.path.abspath(self.cookies_file)}")
         
         self.page = self.context.new_page()
         return self

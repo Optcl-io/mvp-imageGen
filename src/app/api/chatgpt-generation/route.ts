@@ -228,9 +228,50 @@ export async function POST(request: NextRequest) {
       let tempScriptPath, shellCommand;
       
       // Check for cookie file
-      const cookieFilePath = path.join(process.cwd(), "scripts", "chatgpt_cookies.json");
-      const useCookies = existsSync(cookieFilePath);
-      console.log(`Cookie file exists: ${useCookies}`);
+      const cookieFilePaths = [
+        path.join(process.cwd(), "scripts", "cookies.json"),      // User's existing file
+        path.join(process.cwd(), "scripts", "chatgpt_cookies.json") // Fallback file
+      ];
+      
+      // Try to find any existing cookie file
+      let cookieFilePath = null;
+      for (const filePath of cookieFilePaths) {
+        if (existsSync(filePath)) {
+          cookieFilePath = filePath;
+          console.log(`Found cookie file at: ${filePath}`);
+          // Validate the file is a valid JSON file
+          try {
+            const cookieContent = await fs.readFile(filePath, 'utf8');
+            JSON.parse(cookieContent); // Just to validate, we don't need the result
+            console.log("Cookie file contains valid JSON");
+          } catch (e: any) {
+            console.error(`Cookie file exists but contains invalid JSON: ${e.message}`);
+            cookieFilePath = null; // Reset so we don't use invalid cookies
+            continue; // Try next file
+          }
+          break;
+        }
+      }
+      
+      const useCookies = !!cookieFilePath;
+      console.log(`Using cookies for authentication: ${useCookies} (${cookieFilePath || 'not found'})`);
+      
+      // Override command to use cookies if available
+      if (useCookies) {
+        // Remove email/password from the command array
+        const emailIndex = command.indexOf("--email");
+        if (emailIndex !== -1) {
+          command.splice(emailIndex, 2); // Remove --email and its value
+        }
+        
+        const passwordIndex = command.indexOf("--password");
+        if (passwordIndex !== -1) {
+          command.splice(passwordIndex, 2); // Remove --password and its value
+        }
+        
+        // Add the cookies parameter
+        command.push("--cookies", cookieFilePath);
+      }
       
       if (process.platform === 'win32') {
         // For Windows, we have two options:
@@ -242,7 +283,7 @@ export async function POST(request: NextRequest) {
 & "${pythonPath}" "${scriptPath}" `;
           
           // Add authentication
-          if (useCookies) {
+          if (useCookies && cookieFilePath) {
             psContent += `--cookies "${cookieFilePath}" `;
           } else {
             psContent += `--email "${process.env.OPENAI_EMAIL}" `+
@@ -278,7 +319,7 @@ export async function POST(request: NextRequest) {
   "${scriptPath}" ^`;
 
           // Add authentication
-          if (useCookies) {
+          if (useCookies && cookieFilePath) {
             batchContent += `
   --cookies "${cookieFilePath}" ^`;
           } else {
@@ -312,37 +353,99 @@ export async function POST(request: NextRequest) {
           console.log(maskedBatchContent);
         }
       } else {
-        // For Unix systems, create a shell script
+        // For Unix systems, create a shell script with better error handling
         let scriptContent = `#!/bin/bash
-"${pythonPath}" \\
-  "${scriptPath}" \\`;
+set -e
 
-        // Add authentication
-        if (useCookies) {
-          scriptContent += `
-  --cookies "${cookieFilePath}" \\`;
-        } else {
-          scriptContent += `
-  --email "${process.env.OPENAI_EMAIL}" \\
-  --password "${process.env.OPENAI_PASSWORD}" \\`;
-        }
-        
-        // Add other parameters
-        scriptContent += `
-  --image "${imagePath}" \\
-  --product "${productName}" \\
-  --slogan "${slogan}" \\
-  --output "${outputJsonPath}" \\
-  --headless \\
-  ${price ? `--price "${price}" \\` : ''}
-  ${platform ? `--platform "${platform}" \\` : ''}
-  ${audience ? `--audience "${audience}" \\` : ''}
-  ${brandColors ? `--colors "${brandColors}"` : ''}
+# Debug information
+echo "Script started at $(date)"
+echo "Current directory: $(pwd)"
+echo "Python path: \"${pythonPath}\""
+echo "Script path: \"${scriptPath}\""
+
+# Remove any previous output file
+if [ -f "${outputJsonPath}" ]; then
+  echo "Removing previous output file"
+  rm "${outputJsonPath}" || true
+fi
+
+# Check if Python exists
+command -v ${pythonPath} >/dev/null 2>&1 || { echo "ERROR: Python interpreter not found at ${pythonPath}"; exit 1; }
+
+# Check if script exists
+if [ ! -f "${scriptPath}" ]; then
+  echo "ERROR: Script not found at ${scriptPath}"
+  exit 1
+fi
+
+# Check if cookie file exists (if using cookies)
+${useCookies && cookieFilePath ? `
+if [ ! -f "${cookieFilePath}" ]; then
+  echo "WARNING: Cookie file not found at ${cookieFilePath}"
+fi
+` : ''}
+
+# Execute with proper error handling
+echo "Executing Python script..."
+
+# Save and escape arguments properly
+PYTHON_PATH="${pythonPath}"
+SCRIPT_PATH="${scriptPath}"
+${useCookies && cookieFilePath ? `COOKIE_PATH="${cookieFilePath}"` : ''}
+IMAGE_PATH="${imagePath}"
+PRODUCT_NAME="${productName}"
+SLOGAN="${slogan}"
+OUTPUT_PATH="${outputJsonPath}"
+${price ? `PRICE="${price}"` : ''}
+${platform ? `PLATFORM="${platform}"` : ''}
+${audience ? `AUDIENCE="${audience}"` : ''}
+${brandColors ? `BRAND_COLORS="${brandColors}"` : ''}
+
+# Build and execute command
+CMD="$PYTHON_PATH $SCRIPT_PATH"
+${useCookies && cookieFilePath ? `CMD="$CMD --cookies \\"$COOKIE_PATH\\""` : 
+  `CMD="$CMD --email \\"${process.env.OPENAI_EMAIL}\\" --password \\"${process.env.OPENAI_PASSWORD}\\""` }
+CMD="$CMD --image \\"$IMAGE_PATH\\""
+CMD="$CMD --product \\"$PRODUCT_NAME\\""
+CMD="$CMD --slogan \\"$SLOGAN\\""
+CMD="$CMD --output \\"$OUTPUT_PATH\\""
+CMD="$CMD --headless"
+${price ? `CMD="$CMD --price \\"$PRICE\\""` : ''}
+${platform ? `CMD="$CMD --platform \\"$PLATFORM\\""` : ''}
+${audience ? `CMD="$CMD --audience \\"$AUDIENCE\\""` : ''}
+${brandColors ? `CMD="$CMD --colors \\"$BRAND_COLORS\\""` : ''}
+
+echo "Running command: $CMD"
+eval "$CMD"
+
+status=$?
+if [ $status -ne 0 ]; then
+  echo "Python script failed with exit code $status"
+  exit $status
+fi
+
+# Check if output file was created
+if [ ! -f "${outputJsonPath}" ]; then
+  echo "ERROR: Output file was not created at ${outputJsonPath}"
+  exit 1
+fi
+
+echo "Python script execution completed successfully"
+echo "Output file exists: $(ls -la ${outputJsonPath})"
 `;
         tempScriptPath = path.join(tempDir, `run_${generation.id}.sh`);
         await fs.writeFile(tempScriptPath, scriptContent);
-        await execAsync(`chmod +x "${tempScriptPath}"`);
-        shellCommand = tempScriptPath;
+        
+        try {
+          // Ensure the script has execute permissions
+          await execAsync(`chmod +x "${tempScriptPath}"`);
+          console.log("Set execute permissions on script");
+        } catch (chmodError) {
+          console.error("Error setting execute permissions:", chmodError);
+        }
+        
+        // Use bash explicitly rather than relying on script's shebang
+        shellCommand = `/bin/bash "${tempScriptPath}"`;
         
         // For security, mask the password in logs
         const maskedScriptContent = scriptContent.replace(
@@ -356,16 +459,25 @@ export async function POST(request: NextRequest) {
       console.log("Created temporary script file");
       
       // Execute the script file
-      const execResult = await execAsync(shellCommand).catch(e => ({ 
-        stdout: "", 
-        stderr: e.message || "Unknown error", 
-        error: e
-      }));
+      console.log(`Executing command: ${shellCommand}`);
+      const execOptions = { 
+        maxBuffer: 10 * 1024 * 1024, // 10 MB buffer to capture more output
+        timeout: 300000 // 5 minutes timeout
+      };
+      
+      const execResult = await execAsync(shellCommand, execOptions).catch(e => {
+        console.error("Script execution error:", e);
+        return { 
+          stdout: e.stdout || "", 
+          stderr: e.stderr || e.message || "Unknown error", 
+          error: e
+        };
+      });
       
       const stdout = execResult.stdout;
       const stderr = execResult.stderr;
       
-      console.log("Script output:", stdout);
+      console.log("Script output:", stdout || "No output");
       
       // Clean up the temporary script
       await fs.unlink(tempScriptPath).catch(e => 
