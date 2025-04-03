@@ -80,61 +80,54 @@ function LoginPage2() {
           )}
 
           <form className="space-y-6" onSubmit={handleSubmit}>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="block w-full p-3 mt-1 border border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                placeholder="you@example.com"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="block w-full p-3 mt-1 border border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                placeholder="••••••••"
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <label htmlFor="remember-me" className="block ml-2 text-sm text-gray-700">
-                  Remember me
+            <div className="-space-y-px rounded-md shadow-sm">
+              <div>
+                <label htmlFor="email-address" className="sr-only">
+                  Email address
                 </label>
+                <input
+                  id="email-address"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="relative block w-full rounded-t-md border-0 py-1.5 px-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600"
+                  placeholder="Email address"
+                />
               </div>
+              <div>
+                <label htmlFor="password" className="sr-only">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="relative block w-full rounded-b-md border-0 py-1.5 px-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600"
+                  placeholder="Password"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end">
               <div className="text-sm">
                 <Link href="/auth/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
-                  Forgot password?
+                  Forgot your password?
                 </Link>
               </div>
             </div>
+
             <div>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex justify-center w-full px-4 py-3 text-lg font-medium text-white border border-transparent rounded-lg shadow-sm bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70"
+                className="group relative flex w-full justify-center rounded-md bg-blue-600 py-2 px-3 text-sm font-semibold text-white hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:bg-blue-400"
               >
                 {isLoading ? 'Signing in...' : 'Sign in'}
               </button>

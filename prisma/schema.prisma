@@ -30,6 +30,12 @@ model User {
   generationsToday  Int          @default(0)
   images            Image[]
   generations       Generation[]
+  
+  // OTP and Reset Password Fields
+  otpCode           String?      // Store the OTP code
+  otpExpiry         DateTime?    // When the OTP expires
+  resetToken        String?      // Password reset token
+  resetTokenExpiry  DateTime?    // When the reset token expires
 
   @@map("users")
 }
