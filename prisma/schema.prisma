@@ -72,6 +72,15 @@ model Generation {
   @@map("generations")
 }
 
+model Newsletter {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  subscribedAt DateTime @default(now())
+  active       Boolean  @default(true)
+
+  @@map("newsletter")
+}
+
 enum Role {
   USER
   ADMIN

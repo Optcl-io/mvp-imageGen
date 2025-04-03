@@ -3,6 +3,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import NewsletterSubscribe from '../newsletter/NewsletterSubscribe';
 
 export default function CoolFooter() {
   return (
@@ -98,7 +99,7 @@ export default function CoolFooter() {
             <p className="text-sm text-indigo-200 mb-4">
               Subscribe to our newsletter for the latest creative trends.
             </p>
-            <form className="flex">
+            <NewsletterSubscribe className="flex">
               <input
                 type="email"
                 placeholder="Your email"
@@ -111,7 +112,7 @@ export default function CoolFooter() {
               >
                 Join
               </button>
-            </form>
+            </NewsletterSubscribe>
           </div>
         </div>
 

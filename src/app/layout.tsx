@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "./Providers";
 import dynamic from "next/dynamic";
-import CoolFooter from "@/components/layout/Footer";
+import SiteFooter from "@/components/layout/SiteFooter";
 
 // Dynamically import the Header to avoid client/server incompatibility issues
 const Header = dynamic(() => import('@/components/layout/Header'), { loading: () => null });
@@ -26,7 +26,7 @@ export default function RootLayout({
         <Providers>
           <Header />
           <main>{children}</main>
-          <CoolFooter />
+          <SiteFooter />
         </Providers>
       </body>
     </html>
