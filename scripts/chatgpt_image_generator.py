@@ -5,9 +5,10 @@ import json
 from playwright.sync_api import sync_playwright, TimeoutError
 
 class ChatGPTImageGenerator:
-    def __init__(self, email, password, headless=False):
+    def __init__(self, email=None, password=None, cookies_file=None, headless=False):
         self.email = email
         self.password = password
+        self.cookies_file = cookies_file
         self.headless = headless
         self.browser = None
         self.page = None
@@ -18,16 +19,69 @@ class ChatGPTImageGenerator:
         playwright = sync_playwright().start()
         self.browser = playwright.chromium.launch(headless=self.headless)
         self.context = self.browser.new_context()
+        
+        # Load cookies if provided
+        if self.cookies_file and os.path.exists(self.cookies_file):
+            try:
+                with open(self.cookies_file, 'r') as f:
+                    cookies = json.load(f)
+                
+                print(f"Loaded {len(cookies)} cookies from {self.cookies_file}")
+                self.context.add_cookies(cookies)
+                print("Added cookies to browser context")
+            except Exception as e:
+                print(f"Error loading cookies: {str(e)}")
+        
         self.page = self.context.new_page()
         return self
         
+    def check_if_logged_in(self):
+        """Check if already logged in based on current page content"""
+        # Navigate to ChatGPT
+        self.page.goto("https://chat.openai.com/", wait_until="networkidle", timeout=120000)
+        
+        # If we can find the chat input, we're already logged in
+        chat_input = self.page.query_selector('textarea[data-id="root"]')
+        if chat_input:
+            print("Already logged in via cookies")
+            return True
+            
+        print("Not logged in, will need to perform login")
+        return False
+        
     def login(self):
+        # First check if already logged in via cookies
+        if self.cookies_file and self.check_if_logged_in():
+            return
+            
+        # If no email/password provided, fail
+        if not self.email or not self.password:
+            print("Email and password required for login")
+            screenshot_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "no_credentials.png")
+            self.page.screenshot(path=screenshot_path)
+            print(f"Screenshot saved to {screenshot_path}")
+            self.browser.close()
+            exit(4)  # No credentials error code
+            
         try:
             # Navigate to ChatGPT
-            self.page.goto("https://chat.openai.com/")
+            print("Navigating to ChatGPT...")
+            self.page.goto("https://chat.openai.com/", wait_until="networkidle", timeout=120000)
+            
+            # Check current URL for redirects
+            current_url = self.page.url
+            print(f"Current URL: {current_url}")
+            
+            if "auth/error" in current_url or "chatgpt.com/api/auth/error" in current_url:
+                print("Detected error page redirect. OpenAI may be blocking automated access.")
+                screenshot_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "error_redirect.png")
+                self.page.screenshot(path=screenshot_path)
+                print(f"Screenshot saved to {screenshot_path}")
+                self.browser.close()
+                exit(3)  # Special exit code for redirect errors
             
             # Add a longer wait for the page to load fully
-            self.page.wait_for_load_state("networkidle", timeout=60000)
+            self.page.wait_for_load_state("networkidle", timeout=90000)
             print("Page loaded, looking for login button...")
             
             # Check for CloudFlare or other verification challenges
@@ -62,64 +116,120 @@ class ChatGPTImageGenerator:
                     self.browser.close()
                     exit(2)  # Special exit code for security challenges
             
+            # If we can find the chat input, we're already logged in
+            chat_input = self.page.query_selector('textarea[data-id="root"]')
+            if chat_input:
+                print("Already logged in, skipping login process")
+                return
+                
             # Wait for and click the login button with increased timeout
             try:
                 # Try to find the button by text first
-                self.page.click("text=Log in", timeout=60000)
-                print("Clicked login button by text")
-            except Exception as e:
-                print(f"Could not click login button by text: {str(e)}")
-                try:
+                if self.page.query_selector("text=Log in"):
+                    self.page.click("text=Log in", timeout=90000)
+                    print("Clicked login button by text")
+                else:
+                    print("Login button text not found, trying alternative methods")
                     # Try by button role as a fallback
-                    login_button = self.page.get_by_role("button", name="Log in")
-                    login_button.click(timeout=60000)
-                    print("Clicked login button by role")
-                except Exception as e2:
-                    print(f"Could not click login button by role: {str(e2)}")
-                    # Last resort - look for any button that might be login
-                    buttons = self.page.query_selector_all("button")
-                    login_found = False
-                    for button in buttons:
-                        text = button.inner_text().lower()
-                        if "log in" in text or "login" in text or "sign in" in text:
-                            button.click()
-                            login_found = True
-                            print(f"Found login button with text: {text}")
-                            break
-                    
-                    if not login_found:
-                        print("Could not find any login button, checking if already logged in")
-                        # Check if we're already logged in
-                        if self.page.query_selector('textarea[data-id="root"]'):
-                            print("Already logged in, continuing")
-                            return
-                        else:
-                            raise Exception("Could not find login button and not already logged in")
+                    try:
+                        login_button = self.page.get_by_role("button", name="Log in")
+                        login_button.click(timeout=90000)
+                        print("Clicked login button by role")
+                    except Exception as e2:
+                        print(f"Could not click login button by role: {str(e2)}")
+                        # Last resort - look for any button that might be login
+                        buttons = self.page.query_selector_all("button")
+                        login_found = False
+                        for button in buttons:
+                            text = button.inner_text().lower()
+                            if "log in" in text or "login" in text or "sign in" in text:
+                                button.click()
+                                login_found = True
+                                print(f"Found login button with text: {text}")
+                                break
+                        
+                        if not login_found:
+                            print("Could not find any login button, checking if already logged in")
+                            # Check if we're already logged in
+                            if self.page.query_selector('textarea[data-id="root"]'):
+                                print("Already logged in, continuing")
+                                return
+                            else:
+                                raise Exception("Could not find login button and not already logged in")
+            except Exception as e:
+                print(f"Error clicking login button: {str(e)}")
+                screenshot_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "login_button_error.png")
+                self.page.screenshot(path=screenshot_path)
+                print(f"Screenshot saved to {screenshot_path}")
+                # Try direct navigation to login
+                self.page.goto("https://chat.openai.com/auth/login", wait_until="networkidle", timeout=120000)
+                print("Tried direct navigation to login page")
             
             # Wait for the login page to load
-            self.page.wait_for_selector('input[name="username"]', timeout=60000)
-            print("Login page loaded, entering email")
-            
-            # Enter email
-            self.page.fill('input[name="username"]', self.email)
-            self.page.click('button[type="submit"]')
+            try:
+                print("Waiting for username field...")
+                self.page.wait_for_selector('input[name="username"]', timeout=120000)
+                print("Login page loaded, entering email")
+                
+                # Enter email
+                self.page.fill('input[name="username"]', self.email)
+                self.page.click('button[type="submit"]')
+            except TimeoutError:
+                print("Username field not found, checking alternate selectors...")
+                # Try alternative selectors
+                if self.page.query_selector('#username'):
+                    self.page.fill('#username', self.email)
+                    self.page.click('button[type="submit"]')
+                    print("Used alternate username selector")
+                else:
+                    raise Exception("Could not find username field")
             
             # Wait for password field and enter password
-            self.page.wait_for_selector('input[name="password"]', timeout=60000)
-            print("Password field found, entering password")
-            self.page.fill('input[name="password"]', self.password)
-            self.page.click('button[type="submit"]')
+            try:
+                print("Waiting for password field...")
+                self.page.wait_for_selector('input[name="password"]', timeout=120000)
+                print("Password field found, entering password")
+                self.page.fill('input[name="password"]', self.password)
+                self.page.click('button[type="submit"]')
+            except TimeoutError:
+                print("Password field not found, checking alternate selectors...")
+                # Try alternative selectors
+                if self.page.query_selector('#password'):
+                    self.page.fill('#password', self.password)
+                    self.page.click('button[type="submit"]')
+                    print("Used alternate password selector")
+                else:
+                    raise Exception("Could not find password field")
             
             # Wait for the chat to load
             try:
-                self.page.wait_for_selector('textarea[data-id="root"]', timeout=90000)
+                print("Waiting for chat to load...")
+                self.page.wait_for_selector('textarea[data-id="root"]', timeout=180000)
                 print("Login successful")
+                
+                # Save cookies for future use if successfully logged in
+                if not self.cookies_file:
+                    cookie_dir = os.path.dirname(os.path.abspath(__file__))
+                    self.cookies_file = os.path.join(cookie_dir, "chatgpt_cookies.json")
+                
+                cookies = self.context.cookies()
+                with open(self.cookies_file, 'w') as f:
+                    json.dump(cookies, f)
+                print(f"Saved {len(cookies)} cookies to {self.cookies_file}")
+                
             except TimeoutError:
                 print("Login failed or page did not load completely")
                 # Take a screenshot for debugging
                 screenshot_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "login_timeout.png")
                 self.page.screenshot(path=screenshot_path)
                 print(f"Screenshot saved to {screenshot_path}")
+                
+                # Check if there's an error message
+                error_messages = self.page.query_selector_all("div.text-red, .error, .error-message")
+                for error_elem in error_messages:
+                    if error_elem.is_visible():
+                        print(f"Error message found: {error_elem.inner_text()}")
+                
                 self.browser.close()
                 exit(1)
         except Exception as e:
@@ -247,8 +357,9 @@ def create_marketing_prompt(product_name, slogan, price=None, target_platform=No
 
 def main():
     parser = argparse.ArgumentParser(description="Generate marketing images with ChatGPT")
-    parser.add_argument("--email", required=True, help="OpenAI account email")
-    parser.add_argument("--password", required=True, help="OpenAI account password")
+    parser.add_argument("--email", help="OpenAI account email")
+    parser.add_argument("--password", help="OpenAI account password")
+    parser.add_argument("--cookies", help="Path to cookies file for authentication")
     parser.add_argument("--image", required=True, help="Path to source image")
     parser.add_argument("--product", required=True, help="Product name")
     parser.add_argument("--slogan", required=True, help="Product slogan or tagline")
@@ -261,6 +372,11 @@ def main():
     
     args = parser.parse_args()
     
+    # Validate authentication options
+    if not args.cookies and (not args.email or not args.password):
+        print("ERROR: Either --cookies or both --email and --password must be provided")
+        return {"success": False, "error": "Missing authentication credentials"}
+    
     prompt = create_marketing_prompt(
         args.product, 
         args.slogan, 
@@ -270,7 +386,12 @@ def main():
         args.colors
     )
     
-    generator = ChatGPTImageGenerator(args.email, args.password, args.headless)
+    generator = ChatGPTImageGenerator(
+        email=args.email, 
+        password=args.password, 
+        cookies_file=args.cookies,
+        headless=args.headless
+    )
     
     try:
         generator.start()

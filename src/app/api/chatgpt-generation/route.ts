@@ -227,17 +227,30 @@ export async function POST(request: NextRequest) {
       
       let tempScriptPath, shellCommand;
       
+      // Check for cookie file
+      const cookieFilePath = path.join(process.cwd(), "scripts", "chatgpt_cookies.json");
+      const useCookies = existsSync(cookieFilePath);
+      console.log(`Cookie file exists: ${useCookies}`);
+      
       if (process.platform === 'win32') {
         // For Windows, we have two options:
         const usePowerShell = true; // Set to false to use batch files instead
         
         if (usePowerShell) {
           // PowerShell script (better handling of special characters)
-          const psContent = `
-& "${pythonPath}" "${scriptPath}" `+
-            `--email "${process.env.OPENAI_EMAIL}" `+
-            `--password "${process.env.OPENAI_PASSWORD}" `+
-            `--image "${imagePath}" `+
+          let psContent = `
+& "${pythonPath}" "${scriptPath}" `;
+          
+          // Add authentication
+          if (useCookies) {
+            psContent += `--cookies "${cookieFilePath}" `;
+          } else {
+            psContent += `--email "${process.env.OPENAI_EMAIL}" `+
+                         `--password "${process.env.OPENAI_PASSWORD}" `;
+          }
+          
+          // Add other parameters
+          psContent += `--image "${imagePath}" `+
             `--product "${productName}" `+
             `--slogan "${slogan}" `+
             `--output "${outputJsonPath}" `+
@@ -260,11 +273,22 @@ export async function POST(request: NextRequest) {
           console.log(maskedPsContent);
         } else {
           // Batch file (traditional approach)
-          const batchContent = `@echo off
+          let batchContent = `@echo off
 "${pythonPath}" ^
-  "${scriptPath}" ^
+  "${scriptPath}" ^`;
+
+          // Add authentication
+          if (useCookies) {
+            batchContent += `
+  --cookies "${cookieFilePath}" ^`;
+          } else {
+            batchContent += `
   --email "${process.env.OPENAI_EMAIL}" ^
-  --password "${process.env.OPENAI_PASSWORD}" ^
+  --password "${process.env.OPENAI_PASSWORD}" ^`;
+          }
+          
+          // Add other parameters
+          batchContent += `
   --image "${imagePath}" ^
   --product "${productName}" ^
   --slogan "${slogan}" ^
@@ -289,11 +313,22 @@ export async function POST(request: NextRequest) {
         }
       } else {
         // For Unix systems, create a shell script
-        const scriptContent = `#!/bin/bash
+        let scriptContent = `#!/bin/bash
 "${pythonPath}" \\
-  "${scriptPath}" \\
+  "${scriptPath}" \\`;
+
+        // Add authentication
+        if (useCookies) {
+          scriptContent += `
+  --cookies "${cookieFilePath}" \\`;
+        } else {
+          scriptContent += `
   --email "${process.env.OPENAI_EMAIL}" \\
-  --password "${process.env.OPENAI_PASSWORD}" \\
+  --password "${process.env.OPENAI_PASSWORD}" \\`;
+        }
+        
+        // Add other parameters
+        scriptContent += `
   --image "${imagePath}" \\
   --product "${productName}" \\
   --slogan "${slogan}" \\
@@ -374,21 +409,44 @@ export async function POST(request: NextRequest) {
         }, { status: 503 }); // Service Unavailable
       }
       
-      // Check for common error patterns in the output
-      if (stdout.includes("Timeout") && stdout.includes("exceeded")) {
-        console.error("Script timed out during execution");
-        
+      if (stdout.includes("auth/error") || stdout.includes("error page redirect") || stdout.includes("chatgpt.com/api/auth/error")) {
+        console.error("OpenAI auth error detected");
         await prisma.generation.update({
           where: { id: generation.id },
           data: {
             status: "FAILED",
-            feedback: "Operation timed out. OpenAI might be experiencing high traffic."
+            feedback: "OpenAI auth error detected. OpenAI may be blocking automated logins."
           },
         });
         
         return NextResponse.json({
           success: false,
-          error: "ChatGPT automation timed out. The OpenAI service may be slow or experiencing issues."
+          error: "OpenAI is currently blocking automated logins. This is a known issue with ChatGPT's increased security measures."
+        }, { status: 503 }); // Service Unavailable
+      }
+      
+      // Check for common error patterns in the output
+      if (stdout.includes("Timeout") && stdout.includes("exceeded")) {
+        console.error("Script timed out during execution");
+        
+        let specificError = "The OpenAI service may be slow or experiencing issues.";
+        if (stdout.includes('waiting for locator("input[name="username"]")')) {
+          specificError = "Timeout while finding the username field. OpenAI has likely changed their login flow or is blocking automation.";
+        } else if (stdout.includes('waiting for locator("input[name="password"]")')) {
+          specificError = "Timeout while finding the password field. OpenAI has likely changed their login flow.";
+        }
+        
+        await prisma.generation.update({
+          where: { id: generation.id },
+          data: {
+            status: "FAILED",
+            feedback: `Operation timed out. ${specificError}`
+          },
+        });
+        
+        return NextResponse.json({
+          success: false,
+          error: `ChatGPT automation timed out. ${specificError}`
         }, { status: 504 }); // Gateway Timeout
       }
       
