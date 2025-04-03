@@ -49,14 +49,14 @@ export default function NewsletterSubscribe({
   };
 
   return (
-    <div className={`bg-blue-50 rounded-lg p-8 ${className}`}>
-      <div className="max-w-3xl mx-auto text-center">
-        <h2 className="text-2xl font-extrabold text-gray-900">{title}</h2>
-        <p className="mt-3 text-lg text-gray-500">{subtitle}</p>
+    <div className={`rounded-lg p-8 ${className}`}>
+      <div className="flex flex-col items-center justify-center max-w-3xl mx-auto text-center">
+        <h2 className="text-xl font-extrabold text-gray-100">{title}</h2>
+        <p className="mt-3 text-[15px] text-gray-300">{subtitle}</p>
         
         {emailSubscribed ? (
-          <div className="mt-8 bg-green-50 border border-green-200 rounded-md p-4">
-            <p className="text-sm text-green-800">
+          <div className="p-4 mt-8 border border-green-200 rounded-md bg-green-50">
+            <p className="text-sm text-green-400">
               Thank you for subscribing! You'll start receiving our newsletter soon.
             </p>
             <button
@@ -79,14 +79,14 @@ export default function NewsletterSubscribe({
               required
               value={subscribeEmail}
               onChange={(e) => setSubscribeEmail(e.target.value)}
-              className="w-full px-5 py-3 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500 sm:max-w-xs border-gray-300 rounded-md"
+              className="w-full px-5 py-3 placeholder-gray-100 border border-gray-100 rounded-l-md focus:ring-blue-500 focus:border-blue-500 sm:max-w-xs"
               placeholder="Enter your email"
             />
-            <div className="mt-3 rounded-md shadow sm:mt-0 sm:ml-3 sm:flex-shrink-0">
+            <div className="mt-3 shadow rounded-r-md sm:mt-0 sm:flex-shrink-0">
               <button
                 type="submit"
                 disabled={subscribeLoading}
-                className="w-full flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400"
+                className="flex items-center justify-center w-full px-5 py-3 text-base font-medium text-white bg-blue-600 border border-white rounded-r-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400"
               >
                 {subscribeLoading ? 'Subscribing...' : 'Subscribe'}
               </button>
@@ -95,14 +95,14 @@ export default function NewsletterSubscribe({
         )}
         
         {subscribeError && (
-          <div className="mt-3 bg-red-50 border border-red-200 text-red-800 rounded-md p-3 text-sm">
+          <div className="p-3 mt-3 text-sm text-red-800 border border-red-200 rounded-md bg-red-50">
             {subscribeError}
           </div>
         )}
         
-        <p className="mt-3 text-sm text-gray-500">
+        <p className="mt-3 text-sm text-gray-300">
           We care about your data. Read our{' '}
-          <Link href="/privacy" className="font-medium text-blue-600 hover:text-blue-500">
+          <Link href="/privacy" className="font-medium text-blue-400 hover:text-blue-500">
             Privacy Policy
           </Link>
           .
