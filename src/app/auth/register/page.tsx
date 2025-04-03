@@ -49,6 +49,11 @@ function RegisterPage2() {
         throw new Error(data.error || 'Failed to register');
       }
 
+      if (data.requiresVerification) {
+        router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
+        return;
+      }
+
       await signIn('credentials', {
         redirect: false,
         email,

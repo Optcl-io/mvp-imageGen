@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/db/prisma';
 import { Subscription } from '@/lib/db/types';
 import { z } from 'zod';
+import { generateOTP, sendOtpEmail } from '@/lib/email/email-service';
 
 // Define validation schema
 const registerSchema = z.object({
@@ -43,6 +44,13 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Generate OTP for email verification
+    const otp = generateOTP();
+    
+    // Set expiry time (10 minutes from now)
+    const otpExpiry = new Date();
+    otpExpiry.setMinutes(otpExpiry.getMinutes() + 10);
+
     // Create user - always start with FREE subscription
     // Subscription upgrades should only happen through Stripe payment process
     const user = await prisma.user.create({
@@ -51,7 +59,17 @@ export async function POST(request: NextRequest) {
         email,
         password: hashedPassword,
         subscription: Subscription.FREE, // Always start as FREE
+        otpCode: otp,
+        otpExpiry: otpExpiry,
+        // emailVerified will be set to null initially
       },
+    });
+
+    // Send verification email
+    await sendOtpEmail({
+      email,
+      otp,
+      name,
     });
 
     // Remove password from response
@@ -59,7 +77,11 @@ export async function POST(request: NextRequest) {
     const { password: _, ...userWithoutPassword } = user;
 
     return NextResponse.json(
-      { user: userWithoutPassword, message: 'User registered successfully' },
+      { 
+        user: userWithoutPassword, 
+        message: 'Registration successful. Please check your email to verify your account.',
+        requiresVerification: true
+      },
       { status: 201 }
     );
   } catch (error) {
