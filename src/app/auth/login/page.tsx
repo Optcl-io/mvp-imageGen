@@ -67,7 +67,7 @@ function LoginPage2() {
           <div className="mb-8 text-center">
             <h2 className="text-3xl font-bold text-gray-900">Welcome back!</h2>
             <p className="mt-2 text-gray-600">
-              Sign in to your AdGenius account
+              Sign in to your Optcl account
             </p>
           </div>
 

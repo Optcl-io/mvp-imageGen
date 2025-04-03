@@ -7,28 +7,28 @@ export default async function Home() {
   const session = await getServerSession(authOptions);
 
   return (
-    <main className="flex flex-col items-center min-h-screen overflow-hidden z-0">
+    <main className="z-0 flex flex-col items-center min-h-screen overflow-hidden">
       {/* Hero Section */}
-      <div className="w-full bg-gradient-to-r from-purple-900 to-blue-800 text-white relative overflow-hidden z-0">
-        <div className="container mx-auto px-6 py-24 max-w-7xl relative z-10">
-          <div className="flex flex-col md:flex-row items-center gap-12">
+      <div className="relative z-0 w-full overflow-hidden text-white bg-gradient-to-r from-purple-900 to-blue-800">
+        <div className="container relative z-10 px-6 py-24 mx-auto max-w-7xl">
+          <div className="flex flex-col items-center gap-12 md:flex-row">
             <div className="md:w-1/2">
-              <h1 className="text-5xl md:text-6xl font-bold leading-tight mb-6">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400 animate-gradient">
+              <h1 className="mb-6 text-5xl font-bold leading-tight md:text-6xl">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400 animate-gradient">
                   AI-Powered Ad Creation
                 </span>
               </h1>
-              <p className="text-xl mb-8 text-white/90">
+              <p className="mb-8 text-xl text-white/90">
                 Generate stunning ads, social media posts, and marketing content in seconds with our cutting-edge AI platform.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col gap-4 sm:flex-row">
                 {session?.user ? (
                   <Link
                     href="/dashboard"
-                    className="bg-white text-blue-600 hover:bg-blue-50 font-bold rounded-xl px-8 py-4 text-center transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+                    className="flex items-center justify-center gap-2 px-8 py-4 font-bold text-center text-blue-600 transition-all transform bg-white shadow-lg hover:bg-blue-50 rounded-xl hover:scale-105"
                   >
                     <span>Go to Dashboard</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
                   </Link>
@@ -36,29 +36,29 @@ export default async function Home() {
                   <>
                     <Link
                       href="/auth/register"
-                      className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-bold rounded-xl px-8 py-4 text-center transition-all transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                      className="flex items-center justify-center gap-2 px-8 py-4 font-bold text-center text-white transition-all transform shadow-lg bg-gradient-to-r from-yellow-400 to-orange-400 rounded-xl hover:scale-105 hover:shadow-xl"
                     >
                       <span>Start Free Trial</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                       </svg>
                     </Link>
                     <Link
                       href="/auth/login"
-                      className="bg-white/10 border-2 border-white/30 text-white font-bold rounded-xl px-8 py-4 text-center transition-all transform hover:scale-105 hover:bg-white/20 flex items-center justify-center gap-2"
+                      className="flex items-center justify-center gap-2 px-8 py-4 font-bold text-center text-white transition-all transform border-2 bg-white/10 border-white/30 rounded-xl hover:scale-105 hover:bg-white/20"
                     >
                       <span>Sign In</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
                       </svg>
                     </Link>
                   </>
                 )}
               </div>
-              <div className="mt-8 flex items-center gap-4">
+              <div className="flex items-center gap-4 mt-8">
                 <div className="flex -space-x-2">
                   {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="w-10 h-10 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-xs font-bold">
+                    <div key={i} className="flex items-center justify-center w-10 h-10 text-xs font-bold border-2 rounded-full bg-white/20 border-white/30">
                       {i === 4 ? '5K+' : `U${i}`}
                     </div>
                   ))}
@@ -81,19 +81,19 @@ export default async function Home() {
 
       {/* Features Section */}
       <div className="w-full py-20 bg-white">
-        <div className="container mx-auto px-6 max-w-7xl">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+        <div className="container px-6 mx-auto max-w-7xl">
+          <div className="mb-16 text-center">
+            <h2 className="mb-4 text-4xl font-bold text-gray-900">
               Supercharge Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600">Marketing</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="max-w-3xl mx-auto text-xl text-gray-600">
               Our AI platform transforms your ideas into high-performing marketing assets instantly.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-2">
-              <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white p-4 rounded-2xl w-16 h-16 flex items-center justify-center mb-6">
+          <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
+            <div className="p-8 transition-all transform shadow-lg bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl hover:shadow-xl hover:-translate-y-2">
+              <div className="flex items-center justify-center w-16 h-16 p-4 mb-6 text-white bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl">
                 <Image
                   src="https://illustrations.popsy.co/amber/designer.svg"
                   alt="Platform Optimized"
@@ -101,14 +101,14 @@ export default async function Home() {
                   height={40}
                 />
               </div>
-              <h3 className="text-2xl font-bold mb-3 text-gray-900">Platform Optimized</h3>
+              <h3 className="mb-3 text-2xl font-bold text-gray-900">Platform Optimized</h3>
               <p className="text-gray-600">
                 Perfectly sized content for Instagram, TikTok, Facebook, and digital signage with automatic formatting.
               </p>
             </div>
 
-            <div className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-2">
-              <div className="bg-gradient-to-r from-pink-500 to-purple-500 text-white p-4 rounded-2xl w-16 h-16 flex items-center justify-center mb-6">
+            <div className="p-8 transition-all transform shadow-lg bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl hover:shadow-xl hover:-translate-y-2">
+              <div className="flex items-center justify-center w-16 h-16 p-4 mb-6 text-white bg-gradient-to-r from-pink-500 to-purple-500 rounded-2xl">
                 <Image
                   src="https://illustrations.popsy.co/amber/designer.svg"
                   alt="Brand Consistent"
@@ -116,14 +116,14 @@ export default async function Home() {
                   height={40}
                 />
               </div>
-              <h3 className="text-2xl font-bold mb-3 text-gray-900">Brand Consistent</h3>
+              <h3 className="mb-3 text-2xl font-bold text-gray-900">Brand Consistent</h3>
               <p className="text-gray-600">
                 Maintain your brand identity with custom colors, fonts, and logos across all generated content.
               </p>
             </div>
 
-            <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-2">
-              <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white p-4 rounded-2xl w-16 h-16 flex items-center justify-center mb-6">
+            <div className="p-8 transition-all transform shadow-lg bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl hover:shadow-xl hover:-translate-y-2">
+              <div className="flex items-center justify-center w-16 h-16 p-4 mb-6 text-white bg-gradient-to-r from-green-500 to-blue-500 rounded-2xl">
                 <Image
                   src="https://illustrations.popsy.co/amber/designer.svg"
                   alt="Time Saving"
@@ -131,7 +131,7 @@ export default async function Home() {
                   height={40}
                 />
               </div>
-              <h3 className="text-2xl font-bold mb-3 text-gray-900">Time Saving</h3>
+              <h3 className="mb-3 text-2xl font-bold text-gray-900">Time Saving</h3>
               <p className="text-gray-600">
                 Create professional ads in minutes instead of days. Our AI handles the heavy lifting.
               </p>
@@ -142,18 +142,18 @@ export default async function Home() {
 
       {/* Pricing Section */}
       <div className="w-full py-20 bg-gradient-to-r from-purple-900 to-blue-800">
-        <div className="container mx-auto px-6 max-w-7xl">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-300 mb-4">
-              Simple, <span className="text-transparent bg-clip-text bg-white">Transparent</span> Pricing
+        <div className="container px-6 mx-auto max-w-7xl">
+          <div className="mb-16 text-center">
+            <h2 className="mb-4 text-4xl font-bold text-gray-300">
+              Simple, <span className="text-transparent bg-white bg-clip-text">Transparent</span> Pricing
             </h2>
-            <p className="text-xl text-gray-200 max-w-3xl mx-auto">
+            <p className="max-w-3xl mx-auto text-xl text-gray-200">
               Choose the plan that fits your business needs
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl mx-auto">
-            <div className="bg-white border-2 border-gray-200 rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-2 p-10">
+          <div className="grid max-w-5xl grid-cols-1 gap-10 mx-auto md:grid-cols-2">
+            <div className="p-10 transition-all transform bg-white border-2 border-gray-200 shadow-lg rounded-2xl hover:shadow-xl hover:-translate-y-2">
               <div className="mb-6">
                 <h3 className="text-2xl font-bold text-gray-900">Starter</h3>
                 <p className="text-gray-600">Perfect for small businesses and individuals</p>
@@ -161,7 +161,7 @@ export default async function Home() {
 
               <div className="mb-8">
                 <p className="text-5xl font-bold text-gray-900">
-                  $0<span className="text-gray-500 text-xl font-normal">/month</span>
+                  $0<span className="text-xl font-normal text-gray-500">/month</span>
                 </p>
               </div>
 
@@ -188,14 +188,14 @@ export default async function Home() {
 
               <Link
                 href="/auth/register"
-                className="block w-full bg-gray-900 hover:bg-gray-800 text-white font-bold rounded-xl px-6 py-4 text-center transition-all"
+                className="block w-full px-6 py-4 font-bold text-center text-white transition-all bg-gray-900 hover:bg-gray-800 rounded-xl"
               >
                 Get Started Free
               </Link>
             </div>
 
-            <div className="bg-gradient-to-br from-purple-600 to-blue-600 text-white rounded-2xl shadow-xl p-10 relative overflow-hidden transform hover:-translate-y-2">
-              <div className="absolute top-6 right-6 bg-yellow-400 text-purple-900 text-sm font-bold px-4 py-1 rounded-full uppercase">
+            <div className="relative p-10 overflow-hidden text-white transform shadow-xl bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl hover:-translate-y-2">
+              <div className="absolute px-4 py-1 text-sm font-bold text-purple-900 uppercase bg-yellow-400 rounded-full top-6 right-6">
                 Most Popular
               </div>
 
@@ -206,7 +206,7 @@ export default async function Home() {
 
               <div className="mb-8">
                 <p className="text-5xl font-bold">
-                  $29<span className="text-blue-200 text-xl font-normal">/month</span>
+                  $29<span className="text-xl font-normal text-blue-200">/month</span>
                 </p>
               </div>
 
@@ -245,7 +245,7 @@ export default async function Home() {
 
               <Link
                 href="/auth/register?plan=pro"
-                className="block w-full bg-white text-blue-600 hover:bg-blue-50 font-bold rounded-xl px-6 py-4 text-center transition-all shadow-lg"
+                className="block w-full px-6 py-4 font-bold text-center text-blue-600 transition-all bg-white shadow-lg hover:bg-blue-50 rounded-xl"
               >
                 Upgrade to Pro
               </Link>
@@ -257,25 +257,25 @@ export default async function Home() {
 
       {/* How It Works Section */}
       <div className="w-full py-20 bg-gray-50">
-        <div className="container mx-auto px-6 max-w-7xl">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              How <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600">AdGenius</span> Works
+        <div className="container px-6 mx-auto max-w-7xl">
+          <div className="mb-16 text-center">
+            <h2 className="mb-4 text-4xl font-bold text-gray-900">
+              How <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600">Optcl</span> Works
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="max-w-3xl mx-auto text-xl text-gray-600">
               Three simple steps to create stunning marketing content
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
             <div className="flex flex-col items-center text-center">
               <div className="relative mb-8">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full blur-md opacity-30"></div>
-                <div className="relative bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-full w-20 h-20 flex items-center justify-center text-3xl shadow-lg">
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 blur-md opacity-30"></div>
+                <div className="relative flex items-center justify-center w-20 h-20 text-3xl font-bold text-white rounded-full shadow-lg bg-gradient-to-r from-blue-500 to-purple-600">
                   1
                 </div>
               </div>
-              <h3 className="text-2xl font-bold mb-3 text-gray-900">Upload & Describe</h3>
+              <h3 className="mb-3 text-2xl font-bold text-gray-900">Upload & Describe</h3>
               <p className="text-gray-600">
                 Add your product images and describe your campaign goals, target audience, and brand style.
               </p>
@@ -283,12 +283,12 @@ export default async function Home() {
 
             <div className="flex flex-col items-center text-center">
               <div className="relative mb-8">
-                <div className="absolute inset-0 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full blur-md opacity-30"></div>
-                <div className="relative bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-full w-20 h-20 flex items-center justify-center text-3xl shadow-lg">
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-pink-400 to-purple-500 blur-md opacity-30"></div>
+                <div className="relative flex items-center justify-center w-20 h-20 text-3xl font-bold text-white rounded-full shadow-lg bg-gradient-to-r from-pink-500 to-purple-600">
                   2
                 </div>
               </div>
-              <h3 className="text-2xl font-bold mb-3 text-gray-900">AI Magic</h3>
+              <h3 className="mb-3 text-2xl font-bold text-gray-900">AI Magic</h3>
               <p className="text-gray-600">
                 Our AI generates multiple ad variations optimized for engagement and conversions.
               </p>
@@ -296,12 +296,12 @@ export default async function Home() {
 
             <div className="flex flex-col items-center text-center">
               <div className="relative mb-8">
-                <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-blue-500 rounded-full blur-md opacity-30"></div>
-                <div className="relative bg-gradient-to-r from-green-500 to-blue-600 text-white font-bold rounded-full w-20 h-20 flex items-center justify-center text-3xl shadow-lg">
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-green-400 to-blue-500 blur-md opacity-30"></div>
+                <div className="relative flex items-center justify-center w-20 h-20 text-3xl font-bold text-white rounded-full shadow-lg bg-gradient-to-r from-green-500 to-blue-600">
                   3
                 </div>
               </div>
-              <h3 className="text-2xl font-bold mb-3 text-gray-900">Publish & Track</h3>
+              <h3 className="mb-3 text-2xl font-bold text-gray-900">Publish & Track</h3>
               <p className="text-gray-600">
                 Download or publish directly to social platforms and monitor performance analytics.
               </p>
@@ -311,30 +311,30 @@ export default async function Home() {
       </div>
 
       {/* Testimonials */}
-      <div className="w-full py-20  bg-gradient-to-r from-purple-900 to-blue-800">
-        <div className="container mx-auto px-6 max-w-7xl">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-200 mb-4">
-              What Our <span className="text-transparent bg-clip-text bg-white">Clients</span> Say
+      <div className="w-full py-20 bg-gradient-to-r from-purple-900 to-blue-800">
+        <div className="container px-6 mx-auto max-w-7xl">
+          <div className="mb-16 text-center">
+            <h2 className="mb-4 text-4xl font-bold text-gray-200">
+              What Our <span className="text-transparent bg-white bg-clip-text">Clients</span> Say
             </h2>
-            <p className="text-xl text-gray-200 max-w-3xl mx-auto">
+            <p className="max-w-3xl mx-auto text-xl text-gray-200">
               Don&apos;t just take our word for it - hear from our satisfied customers
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             {[
               {
                 name: "Sarah Johnson",
                 role: "Marketing Director, TechStart",
-                quote: "AdGenius has cut our content creation time by 80%. The AI suggestions are incredibly on-brand and effective.",
+                quote: "Optcl has cut our content creation time by 80%. The AI suggestions are incredibly on-brand and effective.",
                 avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=688&q=80",
                 rating: 5
               },
               {
                 name: "Michael Chen",
                 role: "Founder, EcomPro",
-                quote: "Our conversion rates increased by 40% after switching to AdGenius. The platform pays for itself.",
+                quote: "Our conversion rates increased by 40% after switching to Optcl. The platform pays for itself.",
                 avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80",
                 rating: 5
               },
@@ -346,7 +346,7 @@ export default async function Home() {
                 rating: 4
               }
             ].map((testimonial, index) => (
-              <div key={index} className="bg-white rounded-xl shadow-lg p-8 border border-gray-100 hover:shadow-xl transition-shadow">
+              <div key={index} className="p-8 transition-shadow bg-white border border-gray-100 shadow-lg rounded-xl hover:shadow-xl">
                 <div className="flex items-center mb-4">
                   {[...Array(5)].map((_, i) => (
                     <svg
@@ -359,9 +359,9 @@ export default async function Home() {
                     </svg>
                   ))}
                 </div>
-                <p className="text-gray-600 italic mb-6">&quot;{testimonial.quote}&quot;</p>
+                <p className="mb-6 italic text-gray-600">&quot;{testimonial.quote}&quot;</p>
                 <div className="flex items-center">
-                  <div className="relative h-12 w-12 rounded-full overflow-hidden mr-4">
+                  <div className="relative w-12 h-12 mr-4 overflow-hidden rounded-full">
                     <Image
                       src={testimonial.avatar}
                       alt={testimonial.name}
@@ -384,24 +384,24 @@ export default async function Home() {
 
       {/* CTA Section */}
       <div className="w-full py-24 text-black bg-white">
-        <div className="container mx-auto px-6 max-w-5xl text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-8">
+        <div className="container max-w-5xl px-6 mx-auto text-center">
+          <h2 className="mb-8 text-4xl font-bold md:text-5xl">
             Ready to <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-pink-400">transform</span> your marketing?
           </h2>
-          <p className="text-xl mb-10 max-w-3xl mx-auto">
-            Join thousands of businesses creating stunning ads and content with AdGenius AI.
+          <p className="max-w-3xl mx-auto mb-10 text-xl">
+            Join thousands of businesses creating stunning ads and content with Optcl AI.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col justify-center gap-4 sm:flex-row">
             <Link
               href="/auth/register"
-              className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-bold rounded-xl px-10 py-5 text-lg text-center transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+              className="px-10 py-5 text-lg font-bold text-center text-white transition-all transform shadow-lg bg-gradient-to-r from-yellow-400 to-orange-400 rounded-xl hover:scale-105 hover:shadow-xl"
             >
               Start Free Trial
             </Link>
             <Link
               href="/demo"
-              className="bg-white/10 border-2 border-black/30  font-bold rounded-xl px-10 py-5 text-lg text-center transition-all transform hover:scale-105 hover:bg-white/20"
+              className="px-10 py-5 text-lg font-bold text-center transition-all transform border-2 bg-white/10 border-black/30 rounded-xl hover:scale-105 hover:bg-white/20"
             >
               See Live Demo
             </Link>
@@ -410,14 +410,14 @@ export default async function Home() {
       </div>
 
       {/* FAQ Section */}
-      <div className="w-full py-20  bg-gradient-to-r from-purple-900 to-blue-800">
-        <div className="container mx-auto px-6 max-w-5xl">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-200 mb-4">
-              Frequently Asked <span className="text-transparent bg-clip-text bg-white">Questions</span>
+      <div className="w-full py-20 bg-gradient-to-r from-purple-900 to-blue-800">
+        <div className="container max-w-5xl px-6 mx-auto">
+          <div className="mb-16 text-center">
+            <h2 className="mb-4 text-4xl font-bold text-gray-200">
+              Frequently Asked <span className="text-transparent bg-white bg-clip-text">Questions</span>
             </h2>
-            <p className="text-xl text-gray-200 max-w-3xl mx-auto">
-              Everything you need to know about AdGenius
+            <p className="max-w-3xl mx-auto text-xl text-gray-200">
+              Everything you need to know about Optcl
             </p>
           </div>
 
@@ -444,8 +444,8 @@ export default async function Home() {
                 answer: "You can cancel anytime from your account settings. There are no cancellation fees, and you'll retain access until the end of your billing period."
               }
             ].map((faq, index) => (
-              <div key={index} className="bg-gray-50 rounded-xl p-6 hover:bg-gray-100 transition-colors">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{faq.question}</h3>
+              <div key={index} className="p-6 transition-colors bg-gray-50 rounded-xl hover:bg-gray-100">
+                <h3 className="mb-2 text-xl font-bold text-gray-900">{faq.question}</h3>
                 <p className="text-gray-600">{faq.answer}</p>
               </div>
             ))}
