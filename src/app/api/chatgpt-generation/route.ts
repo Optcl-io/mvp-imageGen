@@ -321,57 +321,152 @@ export async function POST(request: NextRequest) {
       console.log("Created temporary script file");
       
       // Execute the script file
-      const { stdout, stderr } = await execAsync(shellCommand);
+      const execResult = await execAsync(shellCommand).catch(e => ({ 
+        stdout: "", 
+        stderr: e.message || "Unknown error", 
+        error: e
+      }));
+      
+      const stdout = execResult.stdout;
+      const stderr = execResult.stderr;
+      
       console.log("Script output:", stdout);
       
       // Clean up the temporary script
-      await fs.unlink(tempScriptPath);
+      await fs.unlink(tempScriptPath).catch(e => 
+        console.error("Error deleting temp script:", e)
+      );
       
       if (stderr) {
         console.error("Script errors:", stderr);
       }
       
-      // Read the output JSON
-      const resultJson = await fs.readFile(outputJsonPath, 'utf8');
-      const result = JSON.parse(resultJson);
-      
-      if (!result.success) {
-        throw new Error("Script execution failed");
+      // Check for specific error conditions in the output
+      if (stdout.includes("CloudFlare") || stdout.includes("verification challenge")) {
+        console.error("CloudFlare challenge detected");
+        await prisma.generation.update({
+          where: { id: generation.id },
+          data: {
+            status: "FAILED",
+            feedback: "CloudFlare security challenge detected. Please try again later or contact support."
+          },
+        });
+        
+        return NextResponse.json({
+          success: false,
+          error: "CloudFlare security challenge detected. OpenAI is currently blocking automated access. Please try again later."
+        }, { status: 503 }); // Service Unavailable
       }
       
-      // Update the generation record with the result
-      const outputImageUrl = `/generated_images/${path.basename(result.image_path)}`;
+      if (stdout.includes("security check") || stdout.includes("verify you are human")) {
+        console.error("Security verification detected");
+        await prisma.generation.update({
+          where: { id: generation.id },
+          data: {
+            status: "FAILED",
+            feedback: "Security verification detected. Please try again later or contact support."
+          },
+        });
+        
+        return NextResponse.json({
+          success: false,
+          error: "Security verification detected. OpenAI is currently requiring manual verification. Please try again later."
+        }, { status: 503 }); // Service Unavailable
+      }
       
-      await prisma.generation.update({
-        where: { id: generation.id },
-        data: {
+      // Check for common error patterns in the output
+      if (stdout.includes("Timeout") && stdout.includes("exceeded")) {
+        console.error("Script timed out during execution");
+        
+        await prisma.generation.update({
+          where: { id: generation.id },
+          data: {
+            status: "FAILED",
+            feedback: "Operation timed out. OpenAI might be experiencing high traffic."
+          },
+        });
+        
+        return NextResponse.json({
+          success: false,
+          error: "ChatGPT automation timed out. The OpenAI service may be slow or experiencing issues."
+        }, { status: 504 }); // Gateway Timeout
+      }
+      
+      // Read the output JSON if it exists
+      let result;
+      try {
+        const resultJson = await fs.readFile(outputJsonPath, 'utf8');
+        result = JSON.parse(resultJson);
+        
+        if (!result.success) {
+          throw new Error("Script execution failed: " + (result.error || "Unknown error"));
+        }
+        
+        // Update the generation record with the result
+        const outputImageUrl = `/generated_images/${path.basename(result.image_path)}`;
+        
+        await prisma.generation.update({
+          where: { id: generation.id },
+          data: {
+            outputImageUrl: outputImageUrl,
+            status: "COMPLETED",
+            feedback: "Generated with ChatGPT"
+          },
+        });
+        
+        // Clean up temporary file
+        await fs.unlink(outputJsonPath).catch(e => 
+          console.error("Error deleting output JSON:", e)
+        );
+        
+        return NextResponse.json({
+          success: true,
+          generationId: generation.id,
           outputImageUrl: outputImageUrl,
-          status: "COMPLETED",
-          feedback: "Generated with ChatGPT"
-        },
-      });
-      
-      // Clean up temporary file
-      await fs.unlink(outputJsonPath);
-      
-      return NextResponse.json({
-        success: true,
-        generationId: generation.id,
-        outputImageUrl: outputImageUrl,
-      });
-    } catch (error) {
+        });
+      } catch (readError: any) {
+        console.error("Error reading output JSON:", readError);
+        
+        // Check if the file doesn't exist, which means the script failed
+        // before creating the output file
+        if (readError.code === 'ENOENT') {
+          await prisma.generation.update({
+            where: { id: generation.id },
+            data: {
+              status: "FAILED",
+              feedback: "ChatGPT automation failed before generating an image."
+            },
+          });
+          
+          return NextResponse.json({
+            success: false,
+            error: "ChatGPT automation failed. The script encountered an error before image generation."
+          }, { status: 500 });
+        }
+        
+        throw readError;
+      }
+    } catch (error: any) {
       console.error("Error executing Python script:", error);
       
-      // Update generation status to failed
+      // Get a more descriptive error message
+      const errorMessage = error.message || "Unknown error";
+      
+      // Update generation status to failed with specific message
       await prisma.generation.update({
         where: { id: generation.id },
         data: {
           status: "FAILED",
+          feedback: `Error: ${errorMessage.substring(0, 200)}`
         },
       });
       
       return NextResponse.json(
-        { error: "Failed to process image generation" },
+        { 
+          success: false,
+          error: "Failed to process image generation",
+          details: errorMessage
+        },
         { status: 500 }
       );
     }

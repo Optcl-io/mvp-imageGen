@@ -22,30 +22,112 @@ class ChatGPTImageGenerator:
         return self
         
     def login(self):
-        # Navigate to ChatGPT
-        self.page.goto("https://chat.openai.com/")
-        
-        # Click the login button
-        self.page.click("text=Log in")
-        
-        # Wait for the login page to load
-        self.page.wait_for_selector('input[name="username"]', timeout=10000)
-        
-        # Enter email
-        self.page.fill('input[name="username"]', self.email)
-        self.page.click('button[type="submit"]')
-        
-        # Wait for password field and enter password
-        self.page.wait_for_selector('input[name="password"]', timeout=10000)
-        self.page.fill('input[name="password"]', self.password)
-        self.page.click('button[type="submit"]')
-        
-        # Wait for the chat to load
         try:
-            self.page.wait_for_selector('textarea[data-id="root"]', timeout=30000)
-            print("Login successful")
-        except TimeoutError:
-            print("Login failed or page did not load completely")
+            # Navigate to ChatGPT
+            self.page.goto("https://chat.openai.com/")
+            
+            # Add a longer wait for the page to load fully
+            self.page.wait_for_load_state("networkidle", timeout=60000)
+            print("Page loaded, looking for login button...")
+            
+            # Check for CloudFlare or other verification challenges
+            cloudflare_selectors = [
+                "iframe[src*='cloudflare']",
+                "#challenge-form",
+                "input[name='cf_captcha_kind']",
+                "div.cf-browser-verification",
+                "#cf-please-wait"
+            ]
+            
+            for selector in cloudflare_selectors:
+                if self.page.query_selector(selector):
+                    print(f"Detected CloudFlare or other verification challenge: {selector}")
+                    screenshot_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cloudflare_challenge.png")
+                    self.page.screenshot(path=screenshot_path)
+                    print(f"Screenshot saved to {screenshot_path}")
+                    print("MANUAL ACTION REQUIRED: Please complete the CloudFlare verification in a regular browser")
+                    self.browser.close()
+                    exit(2)  # Special exit code for CloudFlare challenges
+                    
+            # Also check for any text about security checks
+            page_content = self.page.content().lower()
+            security_phrases = ["security check", "verify you are human", "captcha", "bot detection", "prove you're human"]
+            for phrase in security_phrases:
+                if phrase in page_content:
+                    print(f"Detected possible security verification text: '{phrase}'")
+                    screenshot_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "security_check.png")
+                    self.page.screenshot(path=screenshot_path)
+                    print(f"Screenshot saved to {screenshot_path}")
+                    print("MANUAL ACTION REQUIRED: You may need to complete a security check in a regular browser")
+                    self.browser.close()
+                    exit(2)  # Special exit code for security challenges
+            
+            # Wait for and click the login button with increased timeout
+            try:
+                # Try to find the button by text first
+                self.page.click("text=Log in", timeout=60000)
+                print("Clicked login button by text")
+            except Exception as e:
+                print(f"Could not click login button by text: {str(e)}")
+                try:
+                    # Try by button role as a fallback
+                    login_button = self.page.get_by_role("button", name="Log in")
+                    login_button.click(timeout=60000)
+                    print("Clicked login button by role")
+                except Exception as e2:
+                    print(f"Could not click login button by role: {str(e2)}")
+                    # Last resort - look for any button that might be login
+                    buttons = self.page.query_selector_all("button")
+                    login_found = False
+                    for button in buttons:
+                        text = button.inner_text().lower()
+                        if "log in" in text or "login" in text or "sign in" in text:
+                            button.click()
+                            login_found = True
+                            print(f"Found login button with text: {text}")
+                            break
+                    
+                    if not login_found:
+                        print("Could not find any login button, checking if already logged in")
+                        # Check if we're already logged in
+                        if self.page.query_selector('textarea[data-id="root"]'):
+                            print("Already logged in, continuing")
+                            return
+                        else:
+                            raise Exception("Could not find login button and not already logged in")
+            
+            # Wait for the login page to load
+            self.page.wait_for_selector('input[name="username"]', timeout=60000)
+            print("Login page loaded, entering email")
+            
+            # Enter email
+            self.page.fill('input[name="username"]', self.email)
+            self.page.click('button[type="submit"]')
+            
+            # Wait for password field and enter password
+            self.page.wait_for_selector('input[name="password"]', timeout=60000)
+            print("Password field found, entering password")
+            self.page.fill('input[name="password"]', self.password)
+            self.page.click('button[type="submit"]')
+            
+            # Wait for the chat to load
+            try:
+                self.page.wait_for_selector('textarea[data-id="root"]', timeout=90000)
+                print("Login successful")
+            except TimeoutError:
+                print("Login failed or page did not load completely")
+                # Take a screenshot for debugging
+                screenshot_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "login_timeout.png")
+                self.page.screenshot(path=screenshot_path)
+                print(f"Screenshot saved to {screenshot_path}")
+                self.browser.close()
+                exit(1)
+        except Exception as e:
+            print(f"Error during login process: {str(e)}")
+            # Take a screenshot for debugging
+            screenshot_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "login_error.png")
+            self.page.screenshot(path=screenshot_path)
+            print(f"Screenshot saved to {screenshot_path}")
             self.browser.close()
             exit(1)
             
