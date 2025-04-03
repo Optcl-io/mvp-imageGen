@@ -90,6 +90,11 @@ export default function ContentGeneratorForm({
 
   const handleGenerateContent = async (e: FormEvent) => {
     e.preventDefault();
+    console.log("Form submission triggered");
+    console.log("Selected image:", selectedImage);
+    console.log("Remaining generations:", remainingGenerations);
+    console.log("Product name:", productName);
+    console.log("Slogan:", slogan);
 
     if (!selectedImage) {
       setGenerationError('Please select an image first');
@@ -156,6 +161,10 @@ export default function ContentGeneratorForm({
 
   const handleImageTransform = async (e: FormEvent) => {
     e.preventDefault();
+    console.log("Image transform triggered");
+    console.log("Source image file:", sourceImageFile);
+    console.log("Transform prompt:", transformPrompt);
+    console.log("Remaining generations:", remainingGenerations);
 
     if (!sourceImageFile) {
       setGenerationError('Please select a source image to transform');
@@ -288,7 +297,10 @@ export default function ContentGeneratorForm({
                           ? 'border-indigo-500 ring-2 ring-indigo-200' 
                           : 'border-gray-200 hover:border-indigo-300'
                       }`}
-                      onClick={() => setSelectedImage(image)}
+                      onClick={() => {
+                        setSelectedImage(image);
+                        console.log("Image selected:", image.id);
+                      }}
                     >
                       <Image
                         src={image.url}
@@ -408,9 +420,9 @@ export default function ContentGeneratorForm({
               <div className="mt-6">
                 <button
                   type="submit"
-                  disabled={isGenerating || remainingGenerations <= 0 || !selectedImage}
+                  disabled={isGenerating}
                   className={`w-full py-3 px-4 rounded-lg font-medium text-white shadow-md transition-all ${
-                    isGenerating || remainingGenerations <= 0 || !selectedImage
+                    isGenerating
                       ? 'bg-gray-400 cursor-not-allowed'
                       : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700'
                   }`}
@@ -512,9 +524,9 @@ export default function ContentGeneratorForm({
             <div className="mt-6">
               <button
                 type="submit"
-                disabled={isGenerating || remainingGenerations <= 0 || !sourceImageFile}
+                disabled={isGenerating}
                 className={`w-full py-3 px-4 rounded-lg font-medium text-white shadow-md transition-all ${
-                  isGenerating || remainingGenerations <= 0 || !sourceImageFile
+                  isGenerating
                     ? 'bg-gray-400 cursor-not-allowed'
                     : 'bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700'
                 }`}
