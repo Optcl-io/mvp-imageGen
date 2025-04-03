@@ -202,7 +202,6 @@ export async function POST(request: NextRequest) {
     if (audience) command.push("--audience", audience);
     if (brandColors) command.push("--colors", brandColors);
 
-    // Execute the Python script
     try {
       console.log("Executing ChatGPT image generation script...");
       
@@ -222,16 +221,111 @@ export async function POST(request: NextRequest) {
         }
       }
       
-      // For security, mask the password in logs
-      const logCommand = [...command];
-      const pwIndex = logCommand.indexOf("--password") + 1;
-      if (pwIndex > 0 && pwIndex < logCommand.length) {
-        logCommand[pwIndex] = "********";
-      }
-      console.log(`Running command: ${logCommand.join(" ")}`);
+      // Instead of joining and executing as a string, use child_process.spawn
+      // which handles argument spaces properly
+      const { spawn } = require('child_process');
       
-      const { stdout, stderr } = await execAsync(command.join(" "));
+      let tempScriptPath, shellCommand;
+      
+      if (process.platform === 'win32') {
+        // For Windows, we have two options:
+        const usePowerShell = true; // Set to false to use batch files instead
+        
+        if (usePowerShell) {
+          // PowerShell script (better handling of special characters)
+          const psContent = `
+& "${pythonPath}" "${scriptPath}" `+
+            `--email "${process.env.OPENAI_EMAIL}" `+
+            `--password "${process.env.OPENAI_PASSWORD}" `+
+            `--image "${imagePath}" `+
+            `--product "${productName}" `+
+            `--slogan "${slogan}" `+
+            `--output "${outputJsonPath}" `+
+            `--headless `+
+            `${price ? `--price "${price}" ` : ''}`+
+            `${platform ? `--platform "${platform}" ` : ''}`+
+            `${audience ? `--audience "${audience}" ` : ''}`+
+            `${brandColors ? `--colors "${brandColors}"` : ''}`;
+          
+          tempScriptPath = path.join(tempDir, `run_${generation.id}.ps1`);
+          await fs.writeFile(tempScriptPath, psContent);
+          shellCommand = `powershell.exe -ExecutionPolicy Bypass -File "${tempScriptPath}"`;
+          
+          // For security, mask the password in logs
+          const maskedPsContent = psContent.replace(
+            /--password\s+"(.+?)"/,
+            '--password "********"'
+          );
+          console.log("Running PowerShell script with content:");
+          console.log(maskedPsContent);
+        } else {
+          // Batch file (traditional approach)
+          const batchContent = `@echo off
+"${pythonPath}" ^
+  "${scriptPath}" ^
+  --email "${process.env.OPENAI_EMAIL}" ^
+  --password "${process.env.OPENAI_PASSWORD}" ^
+  --image "${imagePath}" ^
+  --product "${productName}" ^
+  --slogan "${slogan}" ^
+  --output "${outputJsonPath}" ^
+  --headless ^
+  ${price ? `--price "${price}" ^` : ''}
+  ${platform ? `--platform "${platform}" ^` : ''}
+  ${audience ? `--audience "${audience}" ^` : ''}
+  ${brandColors ? `--colors "${brandColors}"` : ''}
+`;
+          tempScriptPath = path.join(tempDir, `run_${generation.id}.bat`);
+          await fs.writeFile(tempScriptPath, batchContent);
+          shellCommand = tempScriptPath;
+          
+          // For security, mask the password in logs
+          const maskedBatchContent = batchContent.replace(
+            /--password\s+"(.+?)"/,
+            '--password "********"'
+          );
+          console.log("Running batch file with content:");
+          console.log(maskedBatchContent);
+        }
+      } else {
+        // For Unix systems, create a shell script
+        const scriptContent = `#!/bin/bash
+"${pythonPath}" \\
+  "${scriptPath}" \\
+  --email "${process.env.OPENAI_EMAIL}" \\
+  --password "${process.env.OPENAI_PASSWORD}" \\
+  --image "${imagePath}" \\
+  --product "${productName}" \\
+  --slogan "${slogan}" \\
+  --output "${outputJsonPath}" \\
+  --headless \\
+  ${price ? `--price "${price}" \\` : ''}
+  ${platform ? `--platform "${platform}" \\` : ''}
+  ${audience ? `--audience "${audience}" \\` : ''}
+  ${brandColors ? `--colors "${brandColors}"` : ''}
+`;
+        tempScriptPath = path.join(tempDir, `run_${generation.id}.sh`);
+        await fs.writeFile(tempScriptPath, scriptContent);
+        await execAsync(`chmod +x "${tempScriptPath}"`);
+        shellCommand = tempScriptPath;
+        
+        // For security, mask the password in logs
+        const maskedScriptContent = scriptContent.replace(
+          /--password\s+"(.+?)"/,
+          '--password "********"'
+        );
+        console.log("Running script with content:");
+        console.log(maskedScriptContent);
+      }
+      
+      console.log("Created temporary script file");
+      
+      // Execute the script file
+      const { stdout, stderr } = await execAsync(shellCommand);
       console.log("Script output:", stdout);
+      
+      // Clean up the temporary script
+      await fs.unlink(tempScriptPath);
       
       if (stderr) {
         console.error("Script errors:", stderr);
