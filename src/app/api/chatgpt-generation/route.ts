@@ -8,6 +8,7 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import path from "path";
 import fs from "fs/promises";
+import { existsSync } from "fs";
 
 const execAsync = promisify(exec);
 
@@ -128,8 +129,64 @@ export async function POST(request: NextRequest) {
 
     // Build command
     const scriptPath = path.join(process.cwd(), "scripts", "chatgpt_image_generator.py");
+    
+    // Use the conda environment's Python
+    // This could be either the conda Python or a virtual environment Python
+    let pythonPath = 'python';
+    let useConda = true;
+    
+    // First, try with system Python to see if playwright is available
+    try {
+      const { stdout, stderr } = await execAsync('python -c "import playwright; print(\'playwright installed\')"');
+      if (stdout.includes('playwright installed')) {
+        console.log("Playwright is available in system Python, using it directly");
+        pythonPath = 'python';
+        useConda = false;
+      }
+    } catch (e) {
+      console.log("Playwright not found in system Python, looking for conda environment...");
+      useConda = true;
+    }
+    
+    if (useConda) {
+      if (process.platform === 'darwin') { // macOS
+        // Common conda locations on macOS
+        const commonPaths = [
+          '/usr/local/anaconda3/envs/chatgpt-automation/bin/python',
+          '/usr/local/miniconda3/envs/chatgpt-automation/bin/python',
+          `${process.env.HOME}/anaconda3/envs/chatgpt-automation/bin/python`,
+          `${process.env.HOME}/miniconda3/envs/chatgpt-automation/bin/python`,
+          '/opt/homebrew/anaconda3/envs/chatgpt-automation/bin/python',
+          '/opt/homebrew/miniconda3/envs/chatgpt-automation/bin/python',
+        ];
+        
+        // Check if any of the paths exist
+        for (const path of commonPaths) {
+          try {
+            if (existsSync(path)) {
+              pythonPath = path;
+              break;
+            }
+          } catch (e) {
+            // Ignore errors and continue to the next path
+          }
+        }
+        
+        // If no path was found, use conda run
+        if (pythonPath === 'python') {
+          pythonPath = 'conda run -n chatgpt-automation python';
+        }
+      } else if (process.platform === 'win32') {
+        // On Windows, use conda run
+        pythonPath = 'conda run -n chatgpt-automation python';
+      } else if (process.env.NODE_ENV === 'production') {
+        // For production Linux servers
+        pythonPath = '/opt/conda/envs/chatgpt-automation/bin/python';
+      }
+    }
+    
     const command = [
-      "python",
+      pythonPath,
       scriptPath,
       "--email", process.env.OPENAI_EMAIL as string,
       "--password", process.env.OPENAI_PASSWORD as string,
@@ -148,6 +205,31 @@ export async function POST(request: NextRequest) {
     // Execute the Python script
     try {
       console.log("Executing ChatGPT image generation script...");
+      
+      // Special handling for macOS users when we don't have direct path
+      if (process.platform === 'darwin' && pythonPath === 'conda run -n chatgpt-automation python') {
+        try {
+          // Try to find the exact Python path using which
+          const { stdout } = await execAsync('conda run -n chatgpt-automation which python');
+          const exactPythonPath = stdout.trim();
+          if (exactPythonPath) {
+            console.log(`Found conda Python path: ${exactPythonPath}`);
+            // Replace the command with the exact path
+            command[0] = exactPythonPath;
+          }
+        } catch (whichError) {
+          console.log("Could not determine exact Python path, using conda run instead");
+        }
+      }
+      
+      // For security, mask the password in logs
+      const logCommand = [...command];
+      const pwIndex = logCommand.indexOf("--password") + 1;
+      if (pwIndex > 0 && pwIndex < logCommand.length) {
+        logCommand[pwIndex] = "********";
+      }
+      console.log(`Running command: ${logCommand.join(" ")}`);
+      
       const { stdout, stderr } = await execAsync(command.join(" "));
       console.log("Script output:", stdout);
       
