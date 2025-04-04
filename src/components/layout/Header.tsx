@@ -18,11 +18,11 @@ export default function Header() {
   const pathname = usePathname();
 
   return (
-    <Disclosure as="nav" className="bg-gradient-to-r from-purple-900 to-blue-800 shadow-lg z-40">
+    <Disclosure as="nav" className="z-40 shadow-lg bg-gradient-to-r from-purple-900 to-blue-800">
       {({ open }) => (
         <>
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex h-20 items-center justify-between">
+          <div className="px-4 mx-auto max-w-[1920px] sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-20">
               <div className="flex items-center">
                 <Link href="/" className="flex items-center">
                   <Image
@@ -30,7 +30,7 @@ export default function Header() {
                     alt="Logo"
                     width={40}
                     height={40}
-                    className="h-10 w-10"
+                    className="w-10 h-10"
                   />
                   <span className="ml-3 text-2xl font-bold text-white">
                     Optcl
@@ -38,7 +38,7 @@ export default function Header() {
                 </Link>
               </div>
               <div className="hidden md:block">
-                <div className="ml-10 flex items-center space-x-8">
+                <div className="flex items-center space-x-8">
                   {navigation.map((item) => (
                     <Link
                       key={item.name}
@@ -57,18 +57,18 @@ export default function Header() {
               <div className="hidden md:block">
                 {session?.user ? (
                   <Menu as="div" className="relative ml-3">
-                    <Menu.Button className="flex rounded-full bg-white/10 text-sm focus:outline-none">
+                    <Menu.Button className="flex text-sm rounded-full bg-white/10 focus:outline-none">
                       <span className="sr-only">Open user menu</span>
                       {session.user.image ? (
                         <Image
-                          className="h-10 w-10 rounded-full border-2 border-white/30"
+                          className="w-10 h-10 border-2 rounded-full border-white/30"
                           src={session.user.image}
                           alt=""
                           width={40}
                           height={40}
                         />
                       ) : (
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/20">
                           <span className="text-xl font-bold text-white">
                             {session.user.name?.charAt(0).toUpperCase() || 'U'}
                           </span>
@@ -84,7 +84,7 @@ export default function Header() {
                       leaveFrom="transform opacity-100 scale-100"
                       leaveTo="transform opacity-0 scale-95"
                     >
-                      <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                      <Menu.Items className="absolute right-0 z-10 w-48 py-1 mt-2 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                         <Menu.Item>
                           {({ active }) => (
                             <Link
@@ -116,26 +116,26 @@ export default function Header() {
                   <div className="flex items-center space-x-4">
                     <Link
                       href="/auth/login"
-                      className="rounded-lg px-4 py-2 text-lg font-medium text-white/90 hover:text-white hover:underline"
+                      className="px-4 py-2 text-lg font-medium rounded-lg text-white/90 hover:text-white hover:underline"
                     >
                       Sign in
                     </Link>
                     <Link
                       href="/auth/register"
-                      className="rounded-lg bg-white px-6 py-2 text-lg font-bold text-blue-600 shadow-lg hover:bg-blue-50"
+                      className="px-6 py-2 text-lg font-bold text-blue-600 bg-white rounded-lg shadow-lg hover:bg-blue-50"
                     >
                       Sign up
                     </Link>
                   </div>
                 )}
               </div>
-              <div className="-mr-2 flex md:hidden">
-                <Disclosure.Button className="inline-flex items-center justify-center rounded-md p-2 text-white hover:bg-white/20 focus:outline-none">
+              <div className="flex -mr-2 md:hidden">
+                <Disclosure.Button className="inline-flex items-center justify-center p-2 text-white rounded-md hover:bg-white/20 focus:outline-none">
                   <span className="sr-only">Open main menu</span>
                   {open ? (
-                    <XMarkIcon className="block h-8 w-8" aria-hidden="true" />
+                    <XMarkIcon className="block w-8 h-8" aria-hidden="true" />
                   ) : (
-                    <Bars3Icon className="block h-8 w-8" aria-hidden="true" />
+                    <Bars3Icon className="block w-8 h-8" aria-hidden="true" />
                   )}
                 </Disclosure.Button>
               </div>
@@ -143,7 +143,7 @@ export default function Header() {
           </div>
 
           <Disclosure.Panel className="md:hidden">
-            <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
               {navigation.map((item) => (
                 <Disclosure.Button
                   key={item.name}
@@ -159,21 +159,21 @@ export default function Header() {
                 </Disclosure.Button>
               ))}
             </div>
-            <div className="border-t border-white/20 pb-3 pt-4">
+            <div className="pt-4 pb-3 border-t border-white/20">
               {session?.user ? (
                 <>
                   <div className="flex items-center px-5">
                     <div className="flex-shrink-0">
                       {session.user.image ? (
                         <Image
-                          className="h-10 w-10 rounded-full border-2 border-white/30"
+                          className="w-10 h-10 border-2 rounded-full border-white/30"
                           src={session.user.image}
                           alt=""
                           width={40}
                           height={40}
                         />
                       ) : (
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/20">
                           <span className="text-xl font-bold text-white">
                             {session.user.name?.charAt(0).toUpperCase() || 'U'}
                           </span>
@@ -189,36 +189,36 @@ export default function Header() {
                       </div>
                     </div>
                   </div>
-                  <div className="mt-3 space-y-1 px-2">
+                  <div className="px-2 mt-3 space-y-1">
                     <Disclosure.Button
                       as={Link}
                       href="/dashboard"
-                      className="block rounded-md px-3 py-2 text-base font-medium text-white/80 hover:bg-white/10 hover:text-white"
+                      className="block px-3 py-2 text-base font-medium rounded-md text-white/80 hover:bg-white/10 hover:text-white"
                     >
                       Dashboard
                     </Disclosure.Button>
                     <Disclosure.Button
                       as="button"
                       onClick={() => signOut({ callbackUrl: '/' })}
-                      className="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-white/80 hover:bg-white/10 hover:text-white"
+                      className="block w-full px-3 py-2 text-base font-medium text-left rounded-md text-white/80 hover:bg-white/10 hover:text-white"
                     >
                       Sign out
                     </Disclosure.Button>
                   </div>
                 </>
               ) : (
-                <div className="mt-3 space-y-1 px-2">
+                <div className="px-2 mt-3 space-y-1">
                   <Disclosure.Button
                     as={Link}
                     href="/auth/login"
-                    className="block rounded-md px-3 py-2 text-base font-medium text-white/80 hover:bg-white/10 hover:text-white"
+                    className="block px-3 py-2 text-base font-medium rounded-md text-white/80 hover:bg-white/10 hover:text-white"
                   >
                     Sign in
                   </Disclosure.Button>
                   <Disclosure.Button
                     as={Link}
                     href="/auth/register"
-                    className="block rounded-md bg-white px-3 py-2 text-base font-medium text-blue-600 hover:bg-blue-50"
+                    className="block px-3 py-2 text-base font-medium text-blue-600 bg-white rounded-md hover:bg-blue-50"
                   >
                     Sign up
                   </Disclosure.Button>

@@ -16,6 +16,7 @@ function PaymentSuccessContent() {
   const [message, setMessage] = useState('Verifying your subscription...');
   const [error, setError] = useState('');
   const [attempts, setAttempts] = useState(0);
+  const [completed, setCompleted] = useState(false);
 
   const forceUpdateSubscription = useCallback(async () => {
     try {
@@ -52,23 +53,48 @@ function PaymentSuccessContent() {
     }
   }, [update, status]);
 
+  // Helper to properly complete the verification process
+  const completeVerification = useCallback((success: boolean, errorMessage?: string) => {
+    if (completed) return; // Prevent multiple completion calls
+    
+    setCompleted(true);
+    setIsProcessing(false);
+    
+    if (success) {
+      setMessage('Your subscription has been activated!');
+      setError('');
+    } else {
+      setError(errorMessage || 'We couldn\'t verify your subscription. Please try again.');
+    }
+    
+    // Force attempts to max to prevent further processing
+    setAttempts(999);
+  }, [completed]);
+
   // This effect handles subscription verification
   useEffect(() => {
-    if (!sessionId || attempts > 4) return;
+    if (!sessionId || completed) return;
     
     const verifySubscription = async () => {
+      // Prevent multiple verification attempts if already successful
+      if (!isProcessing || completed) return;
+      
       // On first attempt, always try the direct force update
       if (attempts === 0) {
         setMessage('Activating your subscription...');
         // Try to force an update immediately
         const success = await forceUpdateSubscription();
+        
+        // If already completed, don't continue
+        if (completed) return;
+        
         if (success) {
           // Wait a moment then refresh the session
           await new Promise(resolve => setTimeout(resolve, 1000));
           await refreshSession();
           
-          setIsProcessing(false);
-          setMessage('Your subscription has been activated!');
+          // Complete the process
+          completeVerification(true);
           return;
         }
       }
@@ -79,8 +105,7 @@ function PaymentSuccessContent() {
       // First attempt a regular session refresh
       if (await refreshSession()) {
         if (session?.user?.subscription === 'PAID') {
-          setIsProcessing(false);
-          setMessage('Your subscription has been activated!');
+          completeVerification(true);
           return;
         }
       }
@@ -89,27 +114,27 @@ function PaymentSuccessContent() {
       setMessage('Updating your subscription...');
       if (await forceUpdateSubscription()) {
         await refreshSession();
-        setIsProcessing(false);
-        setMessage('Your subscription has been activated!');
+        completeVerification(true);
         return;
       }
       
-      // Increment counter and try again if we haven't reached max attempts
-      if (attempts < 4) {
+      // Only increment counter if not already successful
+      if (attempts < 4 && isProcessing && !completed) {
         setAttempts(prev => prev + 1);
       } else {
-        setIsProcessing(false);
-        setError('We couldn\'t automatically verify your subscription. Please try the "Fix My Subscription" button, or contact support if the issue persists.');
+        completeVerification(false, 'We couldn\'t automatically verify your subscription. Please try the "Fix My Subscription" button, or contact support if the issue persists.');
       }
     };
 
-    // Run verification with increasing delays between attempts
-    // Shorter delay for first attempt
-    const delay = [500, 2000, 3000, 5000, 8000][attempts];
-    const timer = setTimeout(verifySubscription, delay);
-    
-    return () => clearTimeout(timer);
-  }, [sessionId, attempts, session, refreshSession, forceUpdateSubscription]);
+    // Only start verification if processing
+    if (isProcessing) {
+      // Run verification with increasing delays between attempts
+      // Shorter delay for first attempt
+      const delay = [500, 2000, 3000, 5000, 8000][attempts];
+      const timer = setTimeout(verifySubscription, delay);
+      return () => clearTimeout(timer);
+    }
+  }, [sessionId, attempts, session, refreshSession, forceUpdateSubscription, isProcessing, completed]);
 
   // Redirect if no session ID
   useEffect(() => {
@@ -119,16 +144,25 @@ function PaymentSuccessContent() {
   }, [sessionId, router]);
 
   const handleManualFix = async () => {
+    if (completed) return;
+    
     setIsProcessing(true);
     setMessage('Applying manual fix...');
     setError('');
     
-    if (await forceUpdateSubscription()) {
-      setIsProcessing(false);
-      setMessage('Your subscription has been activated!');
-    } else {
-      setIsProcessing(false);
-      setError('Failed to manually activate your subscription. Please contact support.');
+    try {
+      const success = await forceUpdateSubscription();
+      
+      if (success) {
+        // Final refresh to confirm
+        await refreshSession();
+        completeVerification(true);
+      } else {
+        completeVerification(false, 'Failed to manually activate your subscription. Please contact support.');
+      }
+    } catch (err) {
+      console.error('Error in manual fix:', err);
+      completeVerification(false, 'An unexpected error occurred. Please contact support.');
     }
   };
 
