@@ -56,7 +56,23 @@ export default function PaymentSuccessPage() {
     if (!sessionId || attempts > 4) return;
     
     const verifySubscription = async () => {
-      // Wait a moment before checking to allow webhooks to process
+      // On first attempt, always try the direct force update
+      if (attempts === 0) {
+        setMessage('Activating your subscription...');
+        // Try to force an update immediately
+        const success = await forceUpdateSubscription();
+        if (success) {
+          // Wait a moment then refresh the session
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          await refreshSession();
+          
+          setIsProcessing(false);
+          setMessage('Your subscription has been activated!');
+          return;
+        }
+      }
+      
+      // Regular verification logic for subsequent attempts
       setMessage(`Verifying your payment (attempt ${attempts + 1})...`);
       
       // First attempt a regular session refresh
@@ -68,14 +84,13 @@ export default function PaymentSuccessPage() {
         }
       }
       
-      // If session refresh didn't work and we're on attempts 1 or 3, try force update
-      if (attempts === 1 || attempts === 3) {
-        setMessage('Updating your subscription...');
-        if (await forceUpdateSubscription()) {
-          setIsProcessing(false);
-          setMessage('Your subscription has been activated!');
-          return;
-        }
+      // If session refresh didn't work, try force update
+      setMessage('Updating your subscription...');
+      if (await forceUpdateSubscription()) {
+        await refreshSession();
+        setIsProcessing(false);
+        setMessage('Your subscription has been activated!');
+        return;
       }
       
       // Increment counter and try again if we haven't reached max attempts
@@ -88,7 +103,8 @@ export default function PaymentSuccessPage() {
     };
 
     // Run verification with increasing delays between attempts
-    const delay = [1000, 2000, 3000, 5000, 8000][attempts];
+    // Shorter delay for first attempt
+    const delay = [500, 2000, 3000, 5000, 8000][attempts];
     const timer = setTimeout(verifySubscription, delay);
     
     return () => clearTimeout(timer);

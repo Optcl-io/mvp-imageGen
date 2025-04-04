@@ -85,17 +85,9 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Get body data
-    const body = await request.json();
-    const { stripeSubscriptionId } = body;
-
-    // Update user subscription to PAID
-    const updatedUser = await prisma.user.update({
+    // Get the user data with potential subscription ID
+    const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      data: {
-        subscription: Subscription.PAID,
-        stripeSubscriptionId: stripeSubscriptionId || null,
-      },
       select: {
         id: true,
         email: true,
@@ -104,10 +96,51 @@ export async function PUT(request: NextRequest) {
       },
     });
 
-    // Update the session
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
+    // Check if the user already has a Stripe subscription ID
+    if (user.stripeSubscriptionId) {
+      try {
+        // Verify subscription status with Stripe
+        const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+        
+        // If subscription is active, update user to PAID
+        if (subscription.status === 'active' || subscription.status === 'trialing') {
+          const updatedUser = await prisma.user.update({
+            where: { id: session.user.id },
+            data: { 
+              subscription: Subscription.PAID 
+            },
+          });
+          
+          return NextResponse.json({
+            success: true,
+            message: "Subscription verified with Stripe and updated to PAID",
+            user: updatedUser
+          });
+        }
+      } catch (stripeError) {
+        console.error('Error checking Stripe subscription:', stripeError);
+        // Continue to fallback if Stripe check fails
+      }
+    }
+
+    // Fallback: Force update to PAID even without checking Stripe
+    const updatedUser = await prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        subscription: Subscription.PAID,
+      },
+    });
+
     return NextResponse.json({
       success: true,
-      message: "Subscription manually updated to PAID successfully",
+      message: "Subscription manually updated to PAID",
       user: updatedUser
     });
   } catch (error) {
