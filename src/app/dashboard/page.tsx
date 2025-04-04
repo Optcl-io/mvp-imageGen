@@ -64,122 +64,72 @@ export default async function DashboardPage() {
   const images = await prisma.image.findMany({
     where: { userId: session.user.id },
     orderBy: { createdAt: "desc" },
+    take: 10,
   });
 
   return (
-    <>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-        <div className="container mx-auto px-4 py-8">
-          {/* Header Section */}
-          <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 mb-2">
-                Welcome back, {user.name?.split(' ')[0] || 'Creator'}!
-              </h1>
-              <div className="flex flex-wrap items-center gap-3">
-                <span className={`${
-                  user.subscription === "PAID" 
-                    ? "bg-gradient-to-r from-yellow-400 to-orange-400 text-white" 
-                    : "bg-gray-200 text-gray-800"
-                } px-4 py-1.5 rounded-full text-sm font-bold shadow-sm`}>
-                  {user.subscription === "PAID" ? "✨ Premium Plan" : "Free Plan"}
-                </span>
-                
-                <div className="flex items-center">
-                  <div className="w-32 bg-gray-200 rounded-full h-2.5">
-                    <div 
-                      className={`h-2.5 rounded-full ${
-                        remainingGenerations === 0 
-                          ? 'bg-red-500' 
-                          : user.subscription === "PAID" 
-                            ? 'bg-green-500' 
-                            : 'bg-blue-500'
-                      }`}
-                      style={{ 
-                        width: `${Math.min(100, (generationsToday / dailyLimit) * 100)}%` 
-                      }}
-                    ></div>
-                  </div>
-                  <span className="ml-3 text-sm font-medium text-gray-600">
-                    {remainingGenerations}/{dailyLimit} remaining
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {user.subscription !== "PAID" && (
-              <Link 
-                href="/pricing"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
-              >
-                Upgrade to Premium
-              </Link>
-            )}
+    <main className="container px-4 py-8 mx-auto">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold mb-1">Dashboard</h1>
+          <p className="text-gray-600">
+            Welcome back, {user.name || user.email || 'User'}
+          </p>
+        </div>
+        
+        <div className="mt-4 md:mt-0 space-y-2 md:space-y-0 md:space-x-4 flex flex-col md:flex-row items-start md:items-center">
+          {/* Subscription status badge */}
+          <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+            user.subscription === "PAID" 
+              ? "bg-green-100 text-green-800" 
+              : "bg-yellow-100 text-yellow-800"
+          }`}>
+            {user.subscription === "PAID" ? "Premium" : "Free"} Plan
           </div>
-
-          {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Generator Panel */}
-            <div className="lg:col-span-2">
-              <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    Create New Content
-                  </h2>
-                  <div className="flex items-center">
-                    <span className="text-sm font-medium text-gray-500 mr-2">
-                      Your images:
-                    </span>
-                    <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full">
-                      {images.length}
-                    </span>
-                  </div>
-                </div>
-                <ContentGeneratorForm 
-                  images={images} 
-                  remainingGenerations={remainingGenerations} 
-                />
-              </div>
-            </div>
-            
-            {/* Sidebar */}
-            <div className="space-y-6">
-              {/* Stats Card */}
-              <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl shadow-xl p-6 text-white">
-                <h3 className="text-lg font-bold mb-4">Your Content Stats</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white/10 p-4 rounded-xl">
-                    <p className="text-sm font-medium">Today&apos;s Generations</p>
-                    <p className="text-2xl font-bold">{generationsToday}</p>
-                  </div>
-                  <div className="bg-white/10 p-4 rounded-xl">
-                    <p className="text-sm font-medium">Total Images</p>
-                    <p className="text-2xl font-bold">{images.length}</p>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Recent Generations */}
-              <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-gray-900">
-                    Recent Content
-                  </h3>
-                  <Link
-                    href="/history"
-                    className="text-sm font-medium text-blue-600 hover:text-blue-800"
-                  >
-                    View All
-                  </Link>
-                </div>
-                {/* eslint-disable @typescript-eslint/no-explicit-any */}
-                <GenerationHistory generations={generations as any} />
-              </div>
-            </div>
+          
+          {/* Remaining generations counter */}
+          <div className="text-sm text-gray-600">
+            {remainingGenerations} / {dailyLimit} generations remaining today
           </div>
         </div>
       </div>
-      <FixedSubscribeButton />
-    </>
+
+      {/* Subscription issue button - only shown to users on free tier */}
+      {user.subscription !== "PAID" && session?.user?.subscription !== "PAID" && (
+        <div className="mb-6 p-4 bg-indigo-50 rounded-lg">
+          <h3 className="text-lg font-medium text-indigo-800 mb-2">Subscription Problem?</h3>
+          <p className="text-sm text-indigo-700 mb-4">
+            If you've already paid but your account still shows as Free, you can fix the issue.
+          </p>
+          <Link 
+            href="/fix-subscription" 
+            className="inline-block px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-medium"
+          >
+            Fix My Subscription
+          </Link>
+        </div>
+      )}
+
+      {/* Content generator form */}
+      <div className="mb-12 bg-white rounded-xl shadow-sm p-6">
+        <ContentGeneratorForm 
+          remainingGenerations={remainingGenerations}
+          isPremium={user.subscription === "PAID"}
+        />
+      </div>
+
+      {/* Recent generations */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-4">Recent Generations</h2>
+        <GenerationHistory generations={generations as any} />
+      </div>
+
+      {/* Free tier CTA */}
+      {user.subscription !== "PAID" && (
+        <div className="fixed bottom-5 right-5 z-10">
+          <FixedSubscribeButton />
+        </div>
+      )}
+    </main>
   );
 }
