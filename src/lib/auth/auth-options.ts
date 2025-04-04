@@ -3,6 +3,8 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/db/prisma";
 import bcrypt from "bcryptjs";
+import { Subscription } from "@/lib/db/types";
+import { stripe } from "@/lib/stripe/stripe-client";
 
 // Extend the default session and JWT types
 declare module "next-auth" {
@@ -113,25 +115,42 @@ export const authOptions: NextAuthOptions = {
         // Only refresh from database if it's been at least 5 minutes since last refresh
         // or if there's no lastRefreshed timestamp
         const now = Date.now();
-        const tenMinutes = 10 * 60 * 1000; // Increase to 10 minutes
+        const fiveMinutes = 5 * 60 * 1000; // Reduce to 5 minutes to ensure quicker updates
         
-        if (!token.lastRefreshed || (now - token.lastRefreshed) > tenMinutes) {
+        if (!token.lastRefreshed || (now - token.lastRefreshed) > fiveMinutes) {
           try {
             // Get the latest user data from the database
             const latestUser = await prisma.user.findUnique({
               where: { id: token.id as string },
-              select: { subscription: true, role: true },
+              select: { subscription: true, role: true, stripeSubscriptionId: true },
             });
             
             if (latestUser) {
-              // Only update token if subscription status has actually changed
-              if (token.subscription !== latestUser.subscription || token.role !== latestUser.role) {
-                token.subscription = latestUser.subscription;
-                token.role = latestUser.role;
-                console.log(`Token refreshed for user ${token.id}, subscription: ${token.subscription}`);
+              // Always update token with latest data
+              token.subscription = latestUser.subscription;
+              token.role = latestUser.role;
+              console.log(`Token refreshed for user ${token.id}, subscription: ${token.subscription}`);
+              
+              // If there's a subscription ID but user is marked as FREE, double-check with Stripe
+              if (latestUser.stripeSubscriptionId && latestUser.subscription === 'FREE') {
+                try {
+                  const subscription = await stripe.subscriptions.retrieve(latestUser.stripeSubscriptionId);
+                  if (subscription.status === 'active' || subscription.status === 'trialing') {
+                    // Update the user in the database to PAID
+                    await prisma.user.update({
+                      where: { id: token.id as string },
+                      data: { subscription: Subscription.PAID }
+                    });
+                    // Update token directly
+                    token.subscription = Subscription.PAID;
+                    console.log(`Fixed subscription discrepancy for user ${token.id}`);
+                  }
+                } catch (stripeError) {
+                  console.error('Error checking Stripe subscription:', stripeError);
+                }
               }
               
-              // Always update the timestamp even if data didn't change
+              // Always update the timestamp
               token.lastRefreshed = now;
             }
           } catch (error) {

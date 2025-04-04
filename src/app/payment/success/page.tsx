@@ -17,29 +17,55 @@ function PaymentSuccessPage2() {
   const [hasAttemptedRefresh, setHasAttemptedRefresh] = useState(false);
 
   const verifySubscription = useCallback(async () => {
-    if (!session?.user || isRefreshing || hasAttemptedRefresh) return;
+    if (!session?.user || isRefreshing) return;
 
-    setHasAttemptedRefresh(true);
+    // If already subscribed, redirect to dashboard
+    if (isSubscribed) {
+      setIsVerifying(false);
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 2000);
+      return;
+    }
 
-    try {
-      await refreshSession(true);
+    // Only try to refresh if we haven't already tried too many times
+    if (attempts < 3 && !hasAttemptedRefresh) {
+      setHasAttemptedRefresh(true);
+
+      try {
+        // Force a session refresh
+        await refreshSession(true);
         
-      if (isSubscribed) {
-        setIsVerifying(false);
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 3000);
-      } else if (attempts < 2) {
-        setTimeout(() => {
-          setAttempts(prev => prev + 1);
-          setHasAttemptedRefresh(false);
-        }, 3000);
-      } else {
+        // Check subscription status again
+        // Add a slight delay to allow session update to propagate
+        setTimeout(async () => {
+          // If subscription is now active, redirect to dashboard
+          if (isSubscribed) {
+            setIsVerifying(false);
+            setTimeout(() => {
+              router.push('/dashboard');
+            }, 2000);
+          } else if (attempts < 3) {
+            // If still not subscribed, try again after a delay
+            setAttempts(prev => prev + 1);
+            setHasAttemptedRefresh(false);
+            
+            // Increase delay with each attempt
+            setTimeout(() => {
+              verifySubscription();
+            }, 3000 + (attempts * 2000));
+          } else {
+            // Give up after 3 attempts
+            setIsVerifying(false);
+          }
+        }, 1000);
+      } catch (err) {
+        console.error("Error verifying subscription:", err);
         setIsVerifying(false);
       }
-    } catch (err) {
+    } else if (attempts >= 3) {
+      // Give up after 3 attempts
       setIsVerifying(false);
-      console.error("Error verifying subscription:", err);
     }
   }, [session, refreshSession, isSubscribed, router, attempts, isRefreshing, hasAttemptedRefresh]);
 

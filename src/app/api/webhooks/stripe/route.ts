@@ -70,6 +70,16 @@ export async function POST(req: NextRequest) {
               },
             });
             
+            // Update subscription metadata to include userId if it's missing
+            if (!subscription.metadata?.userId) {
+              await stripe.subscriptions.update(subscriptionId as string, {
+                metadata: {
+                  userId,
+                },
+              });
+              console.log(`Added userId metadata to subscription ${subscriptionId}`);
+            }
+            
             console.log(`User ${userId} subscription updated based on checkout to ${validStatus ? 'PAID' : 'FREE'}`);
           } catch (error) {
             console.error('Error retrieving subscription:', error);
