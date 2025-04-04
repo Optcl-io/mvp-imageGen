@@ -60,10 +60,6 @@ export async function createCheckoutSession({
       metadata: {
         userId,
       },
-      // Add automatic transfer of customer ID to the subscription
-      transfer_data: {
-        destination: userId,
-      },
     },
   });
 
