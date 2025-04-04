@@ -202,8 +202,6 @@ export default function ContactUsPage() {
           </div>
         </div>
         
-        {/* Newsletter Subscription */}
-        <NewsletterSubscribe className="mt-16" />
       </div>
     </div>
   );

@@ -108,7 +108,7 @@ export default async function DashboardPage() {
         <div className="p-6 bg-white border shadow-sm rounded-xl">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500">Today's Usage</p>
+              <p className="text-sm font-medium text-gray-500">Today&apos;s Usage</p>
               <p className="mt-1 text-2xl font-bold text-gray-900">
                 {generationsToday} <span className="text-sm font-normal text-gray-500">/ {dailyLimit}</span>
               </p>
@@ -213,6 +213,7 @@ export default async function DashboardPage() {
         </div>
         
         {user.generations.length > 0 ? (
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           <GenerationHistory generations={user.generations as any} />
         ) : (
           <div className="p-8 text-center bg-white border-2 border-gray-200 border-dashed rounded-xl">
