@@ -26,8 +26,7 @@ type TabType = 'content' | 'image-to-image';
 
 export default function ContentGeneratorForm({ 
   images = [], 
-  remainingGenerations, 
-  isPremium = false 
+  remainingGenerations
 }: ContentGeneratorFormProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -285,7 +284,7 @@ export default function ContentGeneratorForm({
             {images.length > 0 && (
               <div className="mt-6">
                 <h4 className="mb-3 text-sm font-medium text-gray-700">Select an image:</h4>
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-4">
+                <div className="grid grid-cols-3 gap-4 sm:grid-cols-4">
                   {images.map((image) => (
                     <div
                       key={image.id}

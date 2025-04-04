@@ -5,7 +5,6 @@ import { prisma } from "@/lib/db/prisma";
 import ContentGeneratorForm from "@/components/forms/ContentGeneratorForm";
 import GenerationHistory from "@/components/dashboard/GenerationHistory";
 import dynamic from "next/dynamic";
-import Link from "next/link";
 
 // Dynamically import client components
 const FixedSubscribeButton = dynamic(
@@ -60,23 +59,23 @@ export default async function DashboardPage() {
     take: 10,
   });
 
-  const images = await prisma.image.findMany({
-    where: { userId: session.user.id },
-    orderBy: { createdAt: "desc" },
-    take: 10,
-  });
+  // const images = await prisma.image.findMany({
+  //   where: { userId: session.user.id },
+  //   orderBy: { createdAt: "desc" },
+  //   take: 10,
+  // });
 
   return (
     <main className="container px-4 py-8 mx-auto">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+      <div className="flex flex-col items-start justify-between mb-8 md:flex-row md:items-center">
         <div>
-          <h1 className="text-3xl font-bold mb-1">Dashboard</h1>
+          <h1 className="mb-1 text-3xl font-bold">Dashboard</h1>
           <p className="text-gray-600">
             Welcome back, {user.name || user.email || 'User'}
           </p>
         </div>
         
-        <div className="mt-4 md:mt-0 space-y-2 md:space-y-0 md:space-x-4 flex flex-col md:flex-row items-start md:items-center">
+        <div className="flex flex-col items-start mt-4 space-y-2 md:mt-0 md:space-y-0 md:space-x-4 md:flex-row md:items-center">
           {/* Subscription status badge */}
           <div className={`px-3 py-1 rounded-full text-sm font-medium ${
             user.subscription === "PAID" 
@@ -94,7 +93,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Content generator form */}
-      <div className="mb-12 bg-white rounded-xl shadow-sm p-6">
+      <div className="p-6 mb-12 bg-white shadow-sm rounded-xl">
         <ContentGeneratorForm 
           remainingGenerations={remainingGenerations}
           isPremium={user.subscription === "PAID"}
@@ -103,13 +102,14 @@ export default async function DashboardPage() {
 
       {/* Recent generations */}
       <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">Recent Generations</h2>
+        <h2 className="mb-4 text-2xl font-bold">Recent Generations</h2>
+         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <GenerationHistory generations={generations as any} />
       </div>
 
       {/* Free tier CTA */}
       {user.subscription !== "PAID" && (
-        <div className="fixed bottom-5 right-5 z-10">
+        <div className="fixed z-10 bottom-5 right-5">
           <FixedSubscribeButton />
         </div>
       )}

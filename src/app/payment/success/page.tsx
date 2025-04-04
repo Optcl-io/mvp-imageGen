@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircleIcon } from '@heroicons/react/24/outline';
 import { useSession } from 'next-auth/react';
 
-export default function PaymentSuccessPage() {
+// Create a client component that uses useSearchParams
+function PaymentSuccessContent() {
   const router = useRouter();
   const { data: session, update, status } = useSession();
   const searchParams = useSearchParams();
@@ -175,5 +176,18 @@ export default function PaymentSuccessPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Wrap in Suspense boundary to fix the build error
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="w-16 h-16 border-4 border-t-indigo-600 border-gray-200 rounded-full animate-spin"></div>
+      </div>
+    }>
+      <PaymentSuccessContent />
+    </Suspense>
   );
 }
