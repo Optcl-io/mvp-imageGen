@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function ResetPasswordPage() {
+function ResetPasswordPage2() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
@@ -68,9 +68,9 @@ export default function ResetPasswordPage() {
 
   if (!token && !error) {
     return (
-      <div className="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-purple-50">
-        <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-xl shadow-md text-center">
-          <div className="bg-red-50 border border-red-200 text-red-800 rounded-md p-4 text-sm">
+      <div className="flex items-center justify-center min-h-screen px-4 py-12 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-purple-50">
+        <div className="w-full max-w-md p-8 space-y-8 text-center bg-white shadow-md rounded-xl">
+          <div className="p-4 text-sm text-red-800 border border-red-200 rounded-md bg-red-50">
             Invalid or missing reset token. Please try the reset link again or request a new one.
           </div>
           <Link
@@ -85,26 +85,26 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-purple-50">
-      <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-xl shadow-md">
+    <div className="flex items-center justify-center min-h-screen px-4 py-12 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-purple-50">
+      <div className="w-full max-w-md p-8 space-y-8 bg-white shadow-md rounded-xl">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+          <h2 className="mt-6 text-3xl font-bold tracking-tight text-center text-gray-900">
             Set new password
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-sm text-center text-gray-600">
             Enter your new password below.
           </p>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-800 rounded-md p-4 text-sm">
+          <div className="p-4 text-sm text-red-800 border border-red-200 rounded-md bg-red-50">
             {error}
           </div>
         )}
 
         {success ? (
-          <div className="text-center space-y-6">
-            <div className="bg-green-50 border border-green-200 text-green-800 rounded-md p-4 text-sm mb-4">
+          <div className="space-y-6 text-center">
+            <div className="p-4 mb-4 text-sm text-green-800 border border-green-200 rounded-md bg-green-50">
               Your password has been successfully reset. You will be redirected to the login page.
             </div>
           </div>
@@ -112,7 +112,7 @@ export default function ResetPasswordPage() {
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-700">
                   New Password
                 </label>
                 <input
@@ -123,13 +123,13 @@ export default function ResetPasswordPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="relative block w-full rounded-md border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600"
+                  className="relative block w-full px-4 py-3 text-gray-900 border-0 rounded-md ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600"
                   placeholder="••••••"
                 />
               </div>
               
               <div>
-                <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="confirm-password" className="block mb-2 text-sm font-medium text-gray-700">
                   Confirm New Password
                 </label>
                 <input
@@ -140,7 +140,7 @@ export default function ResetPasswordPage() {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="relative block w-full rounded-md border-0 py-3 px-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600"
+                  className="relative block w-full px-4 py-3 text-gray-900 border-0 rounded-md ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-blue-600"
                   placeholder="••••••"
                 />
               </div>
@@ -150,7 +150,7 @@ export default function ResetPasswordPage() {
               <button
                 type="submit"
                 disabled={isLoading || !token}
-                className="group relative flex w-full justify-center rounded-md bg-blue-600 py-3 px-4 text-sm font-semibold text-white hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:bg-blue-400"
+                className="relative flex justify-center w-full px-4 py-3 text-sm font-semibold text-white bg-blue-600 rounded-md group hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:bg-blue-400"
               >
                 {isLoading ? 'Resetting...' : 'Reset Password'}
               </button>
@@ -170,3 +170,14 @@ export default function ResetPasswordPage() {
     </div>
   );
 } 
+
+
+const ResetPasswordPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResetPasswordPage2 />
+    </Suspense>
+  );
+};
+
+export default ResetPasswordPage;

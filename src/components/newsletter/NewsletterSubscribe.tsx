@@ -57,7 +57,7 @@ export default function NewsletterSubscribe({
         {emailSubscribed ? (
           <div className="p-4 mt-8 border border-green-200 rounded-md bg-green-50">
             <p className="text-sm text-green-400">
-              Thank you for subscribing! You'll start receiving our newsletter soon.
+              Thank you for subscribing! You&apos;ll start receiving our newsletter soon.
             </p>
             <button
               onClick={() => setEmailSubscribed(false)}

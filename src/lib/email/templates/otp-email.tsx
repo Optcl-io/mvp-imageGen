@@ -1,5 +1,5 @@
 import React from 'react';
-import { Html, Body, Container, Text, Button, Head, Hr, Preview, Section, Heading } from '@react-email/components';
+import { Html, Body, Container, Text, Head, Hr, Preview, Section, Heading } from '@react-email/components';
 
 interface OtpEmailProps {
   otp: string;
@@ -23,7 +23,7 @@ export default function OtpEmail({ otp, name }: OtpEmailProps) {
               <Text style={styles.otpText}>{otp}</Text>
             </Section>
             <Text style={styles.text}>
-              If you didn't request this code, you can safely ignore this email.
+              If you didn&apos;t request this code, you can safely ignore this email.
             </Text>
             <Hr style={styles.hr} />
             <Text style={styles.footer}>

@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function VerifyEmailPage() {
+function VerifyEmailPage2() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -12,8 +12,10 @@ export default function VerifyEmailPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const inputRefs = Array(6).fill(0).map(() => useState<HTMLInputElement | null>(null));
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     // Get email from URL parameters
     const emailParam = searchParams.get('email');
@@ -156,19 +158,19 @@ export default function VerifyEmailPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center py-12 bg-gray-50">
-      <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-md">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-3">Email Verification</h1>
+    <div className="flex flex-col items-center justify-center min-h-screen py-12 bg-gray-50">
+      <div className="w-full max-w-md p-8 bg-white shadow-md rounded-xl">
+        <div className="mb-8 text-center">
+          <h1 className="mb-3 text-2xl font-bold text-gray-900">Email Verification</h1>
           {!success ? (
             <p className="text-gray-600">
               We&apos;ve sent a verification code to your email.
               {email && <span className="block mt-1 font-medium text-gray-800">{email}</span>}
             </p>
           ) : (
-            <div className="text-green-600 font-medium">
+            <div className="font-medium text-green-600">
               <p>Email verified successfully!</p>
-              <p className="text-sm mt-2">Redirecting to login...</p>
+              <p className="mt-2 text-sm">Redirecting to login...</p>
             </div>
           )}
         </div>
@@ -176,7 +178,7 @@ export default function VerifyEmailPage() {
         {!success && (
           <form onSubmit={handleVerify} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block mb-1 text-sm font-medium text-gray-700">
                 Email
               </label>
               <input
@@ -191,7 +193,7 @@ export default function VerifyEmailPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="block mb-3 text-sm font-medium text-gray-700">
                 Verification Code
               </label>
               <div className="flex justify-between gap-2">
@@ -205,7 +207,7 @@ export default function VerifyEmailPage() {
                     onKeyDown={(e) => handleKeyDown(index, e)}
                     onPaste={index === 0 ? handlePaste : undefined}
                     ref={(el) => inputRefs[index][1](el)}
-                    className="w-12 h-12 text-center text-xl font-bold border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-12 h-12 text-xl font-bold text-center border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     required
                   />
                 ))}
@@ -213,15 +215,15 @@ export default function VerifyEmailPage() {
             </div>
 
             {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-                <p className="text-red-600 text-sm">{error}</p>
+              <div className="p-3 border border-red-200 rounded-md bg-red-50">
+                <p className="text-sm text-red-600">{error}</p>
               </div>
             )}
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400"
+              className="w-full px-4 py-3 font-medium text-white bg-indigo-600 rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400"
             >
               {isLoading ? 'Verifying...' : 'Verify Email'}
             </button>
@@ -231,7 +233,7 @@ export default function VerifyEmailPage() {
                 type="button"
                 onClick={handleResendOtp}
                 disabled={isLoading}
-                className="text-indigo-600 hover:text-indigo-800 font-medium"
+                className="font-medium text-indigo-600 hover:text-indigo-800"
               >
                 Resend Code
               </button>
@@ -245,3 +247,14 @@ export default function VerifyEmailPage() {
     </div>
   );
 } 
+
+
+const VerifyEmailPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <VerifyEmailPage2 />
+    </Suspense>
+  );
+};
+
+export default VerifyEmailPage;

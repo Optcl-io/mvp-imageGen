@@ -18,7 +18,7 @@ export default function SubscribeEmail({ email }: SubscribeEmailProps) {
               Thank you for subscribing to the OPTCL newsletter with your email: {email}
             </Text>
             <Text style={styles.text}>
-              You'll now receive updates about our latest products, features, and news.
+              You&apos;ll now receive updates about our latest products, features, and news.
             </Text>
             <Section style={styles.buttonContainer}>
               <Button style={styles.button} href="https://optcl.com">

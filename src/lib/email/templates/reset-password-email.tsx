@@ -25,7 +25,7 @@ export default function ResetPasswordEmail({ resetUrl, name }: ResetPasswordEmai
               </Button>
             </Section>
             <Text style={styles.text}>
-              If you didn't request this password reset, you can safely ignore this email.
+              If you didn&apos;t request this password reset, you can safely ignore this email.
             </Text>
             <Text style={styles.text}>
               Alternatively, you can copy and paste the following URL into your browser:
