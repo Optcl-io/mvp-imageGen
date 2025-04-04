@@ -110,52 +110,44 @@ export const authOptions: NextAuthOptions = {
         token.lastRefreshed = Date.now();
       }
       
-      // Refresh the subscription status on token updates, but not too frequently
-      if (trigger === 'update') {
-        // Only refresh from database if it's been at least 5 minutes since last refresh
-        // or if there's no lastRefreshed timestamp
-        const now = Date.now();
-        const fiveMinutes = 5 * 60 * 1000; // Reduce to 5 minutes to ensure quicker updates
-        
-        if (!token.lastRefreshed || (now - token.lastRefreshed) > fiveMinutes) {
-          try {
-            // Get the latest user data from the database
-            const latestUser = await prisma.user.findUnique({
-              where: { id: token.id as string },
-              select: { subscription: true, role: true, stripeSubscriptionId: true },
-            });
+      // Always refresh on updates or token refresh
+      if (trigger === 'update' || trigger === 'signIn') {
+        try {
+          // Get the latest user data from the database
+          const latestUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { subscription: true, role: true, stripeSubscriptionId: true },
+          });
+          
+          if (latestUser) {
+            // Always update token with the latest data
+            token.subscription = latestUser.subscription;
+            token.role = latestUser.role;
             
-            if (latestUser) {
-              // Always update token with latest data
-              token.subscription = latestUser.subscription;
-              token.role = latestUser.role;
-              console.log(`Token refreshed for user ${token.id}, subscription: ${token.subscription}`);
-              
-              // If there's a subscription ID but user is marked as FREE, double-check with Stripe
-              if (latestUser.stripeSubscriptionId && latestUser.subscription === 'FREE') {
-                try {
-                  const subscription = await stripe.subscriptions.retrieve(latestUser.stripeSubscriptionId);
-                  if (subscription.status === 'active' || subscription.status === 'trialing') {
-                    // Update the user in the database to PAID
-                    await prisma.user.update({
-                      where: { id: token.id as string },
-                      data: { subscription: Subscription.PAID }
-                    });
-                    // Update token directly
-                    token.subscription = Subscription.PAID;
-                    console.log(`Fixed subscription discrepancy for user ${token.id}`);
-                  }
-                } catch (stripeError) {
-                  console.error('Error checking Stripe subscription:', stripeError);
+            // Double-check with Stripe if necessary
+            if (latestUser.stripeSubscriptionId && latestUser.subscription === 'FREE') {
+              try {
+                const subscription = await stripe.subscriptions.retrieve(latestUser.stripeSubscriptionId);
+                if (subscription.status === 'active' || subscription.status === 'trialing') {
+                  // Immediate fix: update user in the database
+                  await prisma.user.update({
+                    where: { id: token.id as string },
+                    data: { subscription: Subscription.PAID }
+                  });
+                  // Also update the token
+                  token.subscription = Subscription.PAID;
+                  console.log(`Fixed subscription discrepancy for user ${token.id}`);
                 }
+              } catch (stripeError) {
+                console.error('Error checking Stripe subscription:', stripeError);
               }
-              
-              // Always update the timestamp
-              token.lastRefreshed = now;
             }
-          } catch (error) {
-            console.error('Error refreshing user data:', error);
+            
+            // Record refresh timestamp
+            token.lastRefreshed = Date.now();
           }
+        } catch (error) {
+          console.error('Error refreshing user data:', error);
         }
       }
       

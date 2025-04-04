@@ -61,15 +61,6 @@ export async function POST(req: NextRequest) {
             // Only update to PAID if subscription is active and payment was processed
             const validStatus = ['active', 'trialing'].includes(subscription.status);
             
-            // Update user's subscription status in the database
-            await prisma.user.update({
-              where: { id: userId },
-              data: {
-                subscription: validStatus ? Subscription.PAID : Subscription.FREE,
-                stripeSubscriptionId: subscriptionId as string,
-              },
-            });
-            
             // Update subscription metadata to include userId if it's missing
             if (!subscription.metadata?.userId) {
               await stripe.subscriptions.update(subscriptionId as string, {
@@ -80,21 +71,32 @@ export async function POST(req: NextRequest) {
               console.log(`Added userId metadata to subscription ${subscriptionId}`);
             }
             
+            // Update user's subscription status in the database
+            const updateResult = await prisma.user.update({
+              where: { id: userId },
+              data: {
+                subscription: validStatus ? Subscription.PAID : Subscription.FREE,
+                stripeSubscriptionId: subscriptionId as string,
+              },
+            });
+            
             console.log(`User ${userId} subscription updated based on checkout to ${validStatus ? 'PAID' : 'FREE'}`);
+            console.log(`Updated user data:`, JSON.stringify(updateResult));
           } catch (error) {
-            console.error('Error retrieving subscription:', error);
+            console.error('Error processing subscription checkout:', error);
           }
         } else if (userId && session.mode === 'payment') {
           // One-time payment (if implemented)
           // Only update if payment was successful
           if (session.payment_status === 'paid') {
-            await prisma.user.update({
+            const updateResult = await prisma.user.update({
               where: { id: userId },
               data: {
                 subscription: Subscription.PAID,
               },
             });
             console.log(`User ${userId} upgraded to paid via one-time payment`);
+            console.log(`Updated user data:`, JSON.stringify(updateResult));
           } else {
             console.error(`Payment not completed for one-time payment session ${session.id}`);
           }

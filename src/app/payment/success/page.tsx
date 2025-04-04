@@ -1,151 +1,163 @@
 'use client';
 
-import { useEffect, useState, useCallback, Suspense } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircleIcon } from '@heroicons/react/24/outline';
-import { useSessionRefresh } from '@/lib/stripe/session-helpers';
-import Image from 'next/image';
+import { useSession } from 'next-auth/react';
 
-function PaymentSuccessPage2() {
+export default function PaymentSuccessPage() {
   const router = useRouter();
-  const { session, refreshSession, isSubscribed, isRefreshing } = useSessionRefresh();
+  const { data: session, update, status } = useSession();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
-  const [isVerifying, setIsVerifying] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(true);
+  const [message, setMessage] = useState('Verifying your subscription...');
+  const [error, setError] = useState('');
   const [attempts, setAttempts] = useState(0);
-  const [hasAttemptedRefresh, setHasAttemptedRefresh] = useState(false);
 
-  const verifySubscription = useCallback(async () => {
-    if (!session?.user || isRefreshing) return;
-
-    // If already subscribed, redirect to dashboard
-    if (isSubscribed) {
-      setIsVerifying(false);
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 2000);
-      return;
-    }
-
-    // Only try to refresh if we haven't already tried too many times
-    if (attempts < 3 && !hasAttemptedRefresh) {
-      setHasAttemptedRefresh(true);
-
-      try {
-        // Force a session refresh
-        await refreshSession(true);
-        
-        // Check subscription status again
-        // Add a slight delay to allow session update to propagate
-        setTimeout(async () => {
-          // If subscription is now active, redirect to dashboard
-          if (isSubscribed) {
-            setIsVerifying(false);
-            setTimeout(() => {
-              router.push('/dashboard');
-            }, 2000);
-          } else if (attempts < 3) {
-            // If still not subscribed, try again after a delay
-            setAttempts(prev => prev + 1);
-            setHasAttemptedRefresh(false);
-            
-            // Increase delay with each attempt
-            setTimeout(() => {
-              verifySubscription();
-            }, 3000 + (attempts * 2000));
-          } else {
-            // Give up after 3 attempts
-            setIsVerifying(false);
-          }
-        }, 1000);
-      } catch (err) {
-        console.error("Error verifying subscription:", err);
-        setIsVerifying(false);
+  const forceUpdateSubscription = useCallback(async () => {
+    try {
+      const response = await fetch('/api/payment/subscription-status', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update subscription status');
       }
-    } else if (attempts >= 3) {
-      // Give up after 3 attempts
-      setIsVerifying(false);
+      
+      // Force refresh session after DB update
+      await update();
+      return true;
+    } catch (err) {
+      console.error('Error forcing subscription update:', err);
+      return false;
     }
-  }, [session, refreshSession, isSubscribed, router, attempts, isRefreshing, hasAttemptedRefresh]);
+  }, [update]);
 
+  const refreshSession = useCallback(async () => {
+    if (status !== 'authenticated') return false;
+    
+    try {
+      await update();
+      return true;
+    } catch (err) {
+      console.error('Error refreshing session:', err);
+      return false;
+    }
+  }, [update, status]);
+
+  // This effect handles subscription verification
   useEffect(() => {
-    if (!isVerifying || isRefreshing) return;
-    verifySubscription();
-  }, [verifySubscription, isVerifying, isRefreshing, attempts]);
+    if (!sessionId || attempts > 4) return;
+    
+    const verifySubscription = async () => {
+      // Wait a moment before checking to allow webhooks to process
+      setMessage(`Verifying your payment (attempt ${attempts + 1})...`);
+      
+      // First attempt a regular session refresh
+      if (await refreshSession()) {
+        if (session?.user?.subscription === 'PAID') {
+          setIsProcessing(false);
+          setMessage('Your subscription has been activated!');
+          return;
+        }
+      }
+      
+      // If session refresh didn't work and we're on attempts 1 or 3, try force update
+      if (attempts === 1 || attempts === 3) {
+        setMessage('Updating your subscription...');
+        if (await forceUpdateSubscription()) {
+          setIsProcessing(false);
+          setMessage('Your subscription has been activated!');
+          return;
+        }
+      }
+      
+      // Increment counter and try again if we haven't reached max attempts
+      if (attempts < 4) {
+        setAttempts(prev => prev + 1);
+      } else {
+        setIsProcessing(false);
+        setError('We couldn\'t automatically verify your subscription. Please try the "Fix My Subscription" button, or contact support if the issue persists.');
+      }
+    };
 
+    // Run verification with increasing delays between attempts
+    const delay = [1000, 2000, 3000, 5000, 8000][attempts];
+    const timer = setTimeout(verifySubscription, delay);
+    
+    return () => clearTimeout(timer);
+  }, [sessionId, attempts, session, refreshSession, forceUpdateSubscription]);
+
+  // Redirect if no session ID
   useEffect(() => {
     if (!sessionId) {
       router.push('/dashboard');
     }
   }, [sessionId, router]);
 
+  const handleManualFix = async () => {
+    setIsProcessing(true);
+    setMessage('Applying manual fix...');
+    setError('');
+    
+    if (await forceUpdateSubscription()) {
+      setIsProcessing(false);
+      setMessage('Your subscription has been activated!');
+    } else {
+      setIsProcessing(false);
+      setError('Failed to manually activate your subscription. Please contact support.');
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50">
-      <div className="flex flex-col items-center justify-center min-h-screen px-4 py-12">
-        <div className="w-full max-w-md p-8 space-y-8 bg-white border border-indigo-100 shadow-xl rounded-2xl">
-          <div className="flex flex-col items-center text-center">
-            <div className="relative w-24 h-24 mb-4">
-              <Image 
-                src="https://illustrations.popsy.co/amber/success.svg" 
-                alt="Success illustration"
-                fill
-                className="object-contain"
-              />
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="w-full max-w-md p-8 mx-auto bg-white rounded-xl shadow-lg">
+        <div className="text-center">
+          {isProcessing ? (
+            <div className="w-16 h-16 mx-auto mb-4 border-4 border-t-indigo-600 border-gray-200 rounded-full animate-spin"></div>
+          ) : error ? (
+            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full">
+              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
             </div>
-            <CheckCircleIcon className="absolute w-16 h-16 mb-4 text-green-500 opacity-20" />
-            <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-teal-600">
-              Payment Successful!
-            </h2>
-            
-            {isVerifying ? (
-              <div className="mt-4 text-sm text-gray-600">
-                <p className="font-medium">Processing your subscription...</p>
-                <p className="mt-2 text-xs text-gray-500">
-                  This may take a few moments. Please wait...
-                </p>
-                <div className="flex items-center justify-center mt-4">
-                  <div className="w-8 h-8 border-t-2 border-b-2 border-indigo-500 rounded-full animate-spin"></div>
-                </div>
-              </div>
-            ) : (
-              <div className="mt-4">
-                <p className="text-sm text-gray-600">
-                  Thank you for subscribing to our premium plan. Your account has been upgraded!
-                </p>
-                <div className="p-3 mt-3 border border-green-100 rounded-lg bg-green-50">
-                  <p className="text-xs text-green-700">
-                    You now have access to all premium features. Start creating amazing content!
-                  </p>
-                </div>
-              </div>
-            )}
-            
-            <p className="mt-4 text-xs text-gray-500">
-              You will be redirected to the dashboard in a few seconds.
-            </p>
-          </div>
+          ) : (
+            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full">
+              <CheckCircleIcon className="w-8 h-8 text-green-600" />
+            </div>
+          )}
+
+          <h1 className="mb-4 text-2xl font-bold text-gray-900">Payment Successful</h1>
           
-          <div className="flex justify-center mt-6">
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center px-6 py-3 text-sm font-medium text-white transition-all duration-200 border border-transparent shadow-sm rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          <p className="mb-6 text-gray-600">
+            {error || message}
+          </p>
+          
+          {error && (
+            <button
+              onClick={handleManualFix}
+              className="block w-full px-5 py-3 mb-4 font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
             >
-              Go to Dashboard
-            </Link>
-          </div>
+              Fix My Subscription
+            </button>
+          )}
+
+          <Link
+            href="/dashboard"
+            className={`block w-full px-5 py-3 font-medium text-center rounded-lg ${
+              error ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'
+            }`}
+          >
+            Go to Dashboard
+          </Link>
         </div>
       </div>
     </div>
   );
 }
-
-const PaymentSuccessPage = () => {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <PaymentSuccessPage2 />
-    </Suspense>
-  );
-};
-
-export default PaymentSuccessPage;

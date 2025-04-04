@@ -7,7 +7,6 @@ import GenerationHistory from "@/components/dashboard/GenerationHistory";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
-
 // Dynamically import client components
 const FixedSubscribeButton = dynamic(
   () => import('@/components/subscription/FixedSubscribeButton'),
@@ -93,22 +92,6 @@ export default async function DashboardPage() {
           </div>
         </div>
       </div>
-
-      {/* Subscription issue button - only shown to users on free tier */}
-      {user.subscription !== "PAID" && session?.user?.subscription !== "PAID" && (
-        <div className="mb-6 p-4 bg-indigo-50 rounded-lg">
-          <h3 className="text-lg font-medium text-indigo-800 mb-2">Subscription Problem?</h3>
-          <p className="text-sm text-indigo-700 mb-4">
-            If you've already paid but your account still shows as Free, you can fix the issue.
-          </p>
-          <Link 
-            href="/fix-subscription" 
-            className="inline-block px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-medium"
-          >
-            Fix My Subscription
-          </Link>
-        </div>
-      )}
 
       {/* Content generator form */}
       <div className="mb-12 bg-white rounded-xl shadow-sm p-6">

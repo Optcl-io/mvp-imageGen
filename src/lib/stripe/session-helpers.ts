@@ -19,12 +19,34 @@ export function useSessionRefresh() {
   const [localRefreshing, setLocalRefreshing] = useState(false);
 
   const refreshSession = async (force = false) => {
-    // Prevent refreshing too frequently (2 minutes max)
-    const now = Date.now();
-    const twoMinutes = 2 * 60 * 1000;
+    // Allow immediate refresh when forced
+    if (force) {
+      try {
+        setLocalRefreshing(true);
+        globalState.isRefreshing = true;
+        
+        // Perform the refresh
+        await update();
+        
+        // Update time tracker
+        globalState.lastRefreshed = Date.now();
+        return true;
+      } catch (error) {
+        console.error('Error refreshing session:', error);
+        return false;
+      } finally {
+        // Reset state
+        globalState.isRefreshing = false;
+        setLocalRefreshing(false);
+      }
+    }
     
-    // Check global state to prevent multiple components from refreshing simultaneously
-    if (globalState.isRefreshing || (!force && now - globalState.lastRefreshed < twoMinutes)) {
+    // Standard refresh with rate limiting
+    const now = Date.now();
+    const oneMinute = 60 * 1000; // Reduce to 1 minute to ensure quicker updates
+    
+    // Prevent refreshing too frequently
+    if (globalState.isRefreshing || (!force && now - globalState.lastRefreshed < oneMinute)) {
       return false;
     }
     
