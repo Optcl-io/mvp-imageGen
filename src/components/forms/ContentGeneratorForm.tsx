@@ -36,7 +36,7 @@ export default function ContentGeneratorForm({
   const [selectedImage, setSelectedImage] = useState<ImageType | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState('');
-  const [activeTab, setActiveTab] = useState<TabType>('content');
+  const [activeTab, setActiveTab] = useState<TabType>('image-to-image');
   
   // Content generation form fields
   const [productName, setProductName] = useState('');
