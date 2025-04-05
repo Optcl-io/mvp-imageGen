@@ -4,30 +4,30 @@ import Image from 'next/image';
 
 export default function SiteFooter() {
   return (
-    <footer className=" bg-gradient-to-r from-gray-900 to-gray-800" aria-labelledby="footer-heading">
+    <footer className="z-50 flex bg-white" aria-labelledby="footer-heading">
       <h2 id="footer-heading" className="sr-only">
         Footer
       </h2>
 
-      <div className="px-6 py-16 mx-auto max-w-7xl sm:px-6 lg:px-8 lg:py-20">
+      <div className="z-50 px-6 py-16 mx-auto max-w-7xl sm:px-6 lg:px-8 lg:py-20">
         {/* Main footer content */}
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
           {/* Brand info */}
           <div className="space-y-8">
             <div className="flex items-center">
-              <div className="relative w-10 h-10 overflow-hidden shadow-md">
+              <div className="relative w-10 h-10 overflow-hidden">
                 <Image
                   src={'/logo.svg'}
                   alt="User profile"
                   fill
-                  className="object-cover"
+                  className="object-cover invert"
                 />
               </div>
               <span className="ml-3 text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">
                 OPTCL
               </span>
             </div>
-            <p className="text-base text-gray-300">
+            <p className="text-base text-gray-700">
               Empowering businesses with AI-driven solutions for the modern digital landscape.
             </p>
 
@@ -83,7 +83,7 @@ export default function SiteFooter() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="text-gray-400 transition-colors duration-200 hover:text-white"
+                  className="text-gray-600 transition-colors duration-200 hover:text-black"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -98,7 +98,7 @@ export default function SiteFooter() {
           <div className="grid grid-cols-2 gap-8 mt-12 xl:mt-0 xl:col-span-2">
             <div className="md:grid md:grid-cols-2 md:gap-8">
               <div>
-                <h3 className="text-sm font-semibold tracking-wider text-white uppercase">Solutions</h3>
+                <h3 className="text-sm font-semibold tracking-wider text-black uppercase">Solutions</h3>
                 <ul className="mt-4 space-y-4">
                   {[
                     { name: 'Pricing', href: '/pricing' },
@@ -107,7 +107,7 @@ export default function SiteFooter() {
                     { name: 'Integrations', href: '/integrations' }
                   ].map((item) => (
                     <li key={item.name}>
-                      <Link href={item.href} className="text-base text-gray-300 transition-colors duration-200 hover:text-white">
+                      <Link href={item.href} className="text-base text-gray-700 transition-colors duration-200 hover:text-white">
                         {item.name}
                       </Link>
                     </li>
@@ -115,16 +115,15 @@ export default function SiteFooter() {
                 </ul>
               </div>
               <div className="mt-12 md:mt-0">
-                <h3 className="text-sm font-semibold tracking-wider text-white uppercase">Support</h3>
+                <h3 className="text-sm font-semibold tracking-wider text-black uppercase">Support</h3>
                 <ul className="mt-4 space-y-4">
                   {[
                     { name: 'Documentation', href: '/documentation' },
                     { name: 'Guides', href: '/guides' },
-                    { name: 'API Status', href: '/status' },
                     { name: 'Contact Us', href: '/contact' }
                   ].map((item) => (
                     <li key={item.name}>
-                      <Link href={item.href} className="text-base text-gray-300 transition-colors duration-200 hover:text-white">
+                      <Link href={item.href} className="text-base text-gray-700 transition-colors duration-200 hover:text-white">
                         {item.name}
                       </Link>
                     </li>
@@ -134,16 +133,15 @@ export default function SiteFooter() {
             </div>
             <div className="md:grid md:grid-cols-2 md:gap-8">
               <div>
-                <h3 className="text-sm font-semibold tracking-wider text-white uppercase">Company</h3>
+                <h3 className="text-sm font-semibold tracking-wider text-black uppercase">Company</h3>
                 <ul className="mt-4 space-y-4">
                   {[
                     { name: 'About', href: '/about' },
                     { name: 'Blog', href: '/blog' },
-                    { name: 'Careers', href: '/careers' },
-                    { name: 'Press', href: '/press' }
+                    { name: 'Careers', href: '/careers' }
                   ].map((item) => (
                     <li key={item.name}>
-                      <Link href={item.href} className="text-base text-gray-300 transition-colors duration-200 hover:text-white">
+                      <Link href={item.href} className="text-base text-gray-700 transition-colors duration-200 hover:text-white">
                         {item.name}
                       </Link>
                     </li>
@@ -151,16 +149,14 @@ export default function SiteFooter() {
                 </ul>
               </div>
               <div className="mt-12 md:mt-0">
-                <h3 className="text-sm font-semibold tracking-wider text-white uppercase">Legal</h3>
+                <h3 className="text-sm font-semibold tracking-wider text-black uppercase">Legal</h3>
                 <ul className="mt-4 space-y-4">
                   {[
                     { name: 'Privacy', href: '/privacy' },
-                    { name: 'Terms', href: '/terms' },
-                    { name: 'Cookie Policy', href: '/cookies' },
-                    { name: 'GDPR', href: '/gdpr' }
+                    { name: 'Terms', href: '/terms' }
                   ].map((item) => (
                     <li key={item.name}>
-                      <Link href={item.href} className="text-base text-gray-300 transition-colors duration-200 hover:text-white">
+                      <Link href={item.href} className="text-base text-gray-700 transition-colors duration-200 hover:text-white">
                         {item.name}
                       </Link>
                     </li>

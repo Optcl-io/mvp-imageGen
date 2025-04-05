@@ -20,7 +20,7 @@ const tiers = [
     buttonHref: '/auth/register?plan=free',
     isPrimary: false,
     activeLabel: 'Your Current Plan',
-    icon: <ArrowPathIcon className="h-6 w-6 text-blue-500" />
+    icon: <ArrowPathIcon className="w-6 h-6 text-blue-500" />
   },
   {
     name: 'Pro',
@@ -42,7 +42,7 @@ const tiers = [
     buttonHref: '',
     isPrimary: true,
     activeLabel: 'Your Current Plan',
-    icon: <SparklesIcon className="h-6 w-6 text-yellow-400" />
+    icon: <SparklesIcon className="w-6 h-6 text-yellow-400" />
   },
 ];
 
@@ -52,10 +52,10 @@ export default async function PricingPage() {
   const currentSubscription = session?.user?.subscription || 'FREE';
 
   return (
-    <div className="bg-gradient-to-b from-white to-blue-50 py-24 sm:py-32">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+    <div className="py-24 bg-gradient-to-b from-white to-blue-50 sm:py-32">
+      <div className="px-6 mx-auto max-w-7xl lg:px-8">
         {/* Hero Section */}
-        <div className="mx-auto max-w-4xl text-center">
+        <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
             Simple, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Transparent</span> Pricing
           </h1>
@@ -65,7 +65,7 @@ export default async function PricingPage() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="mx-auto mt-20 grid max-w-2xl grid-cols-1 gap-8 lg:max-w-5xl lg:grid-cols-2">
+        <div className="grid max-w-2xl grid-cols-1 gap-8 mx-auto mt-20 lg:max-w-5xl lg:grid-cols-2">
           {tiers.map((tier) => {
             const isCurrentPlan = tier.id === 'premium' 
               ? currentSubscription === 'PAID' 
@@ -74,14 +74,14 @@ export default async function PricingPage() {
             return (
               <div 
                 key={tier.id}
-                className={`relative rounded-2xl p-8 shadow-xl ${
+                className={`relative rounded-2xl p-8  justify-between flex flex-col shadow-xl ${
                   tier.isPrimary 
                     ? 'bg-gradient-to-br from-purple-600 to-blue-600 text-white border-0'
                     : 'bg-white text-gray-900 border border-gray-200'
                 }`}
               >
                 {isCurrentPlan && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 inline-flex items-center rounded-full bg-gradient-to-r from-yellow-400 to-orange-400 px-4 py-1 text-sm font-bold text-white shadow-lg">
+                  <div className="absolute inline-flex items-center px-4 py-1 text-sm font-bold text-white transform -translate-x-1/2 rounded-full shadow-lg -top-3 left-1/2 bg-gradient-to-r from-yellow-400 to-orange-400">
                     {tier.activeLabel}
                   </div>
                 )}
@@ -102,7 +102,7 @@ export default async function PricingPage() {
                 </p>
                 
                 <div className="mb-8">
-                  <p className="text-5xl font-bold mb-2">
+                  <p className="mb-2 text-5xl font-bold">
                     {tier.price}
                     {tier.period && (
                       <span className="text-xl font-normal">/{tier.period}</span>
@@ -113,7 +113,7 @@ export default async function PricingPage() {
                   )}
                 </div>
                 
-                <ul role="list" className="space-y-4 mb-10">
+                <ul role="list" className="mb-10 space-y-4">
                   {tier.features.map((feature) => (
                     <li key={feature} className="flex items-start">
                       <div className={`flex-shrink-0 p-1 rounded-full mr-3 ${
@@ -168,7 +168,7 @@ export default async function PricingPage() {
                     ) : (
                       <a
                         href={tier.buttonHref}
-                        className="block w-full py-3 px-4 bg-gray-900 hover:bg-gray-800 text-white rounded-xl font-bold text-center shadow-lg transition-colors"
+                        className="block w-full px-4 py-3 font-bold text-center text-white transition-colors bg-gray-900 shadow-lg hover:bg-gray-800 rounded-xl"
                       >
                         {tier.buttonText}
                       </a>
@@ -181,32 +181,32 @@ export default async function PricingPage() {
         </div>
 
                 {/* Features Grid */}
-                <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid grid-cols-1 gap-8 mt-16 sm:grid-cols-2 lg:grid-cols-4">
           {[
             {
               name: 'Unlimited Creativity',
-              icon: <BoltIcon className="h-8 w-8 text-purple-600" />,
+              icon: <BoltIcon className="w-8 h-8 text-purple-600" />,
               description: 'Generate as many variations as you need'
             },
             {
               name: 'Premium Quality',
-              icon: <CheckBadgeIcon className="h-8 w-8 text-blue-600" />,
+              icon: <CheckBadgeIcon className="w-8 h-8 text-blue-600" />,
               description: 'High-resolution, professional-grade outputs'
             },
             {
               name: 'Instant Access',
-              icon: <SparklesIcon className="h-8 w-8 text-yellow-500" />,
+              icon: <SparklesIcon className="w-8 h-8 text-yellow-500" />,
               description: 'Start creating immediately after signup'
             },
             {
               name: 'Secure Payments',
-              icon: <SparklesIcon className="h-8 w-8 text-yellow-500" />,
+              icon: <SparklesIcon className="w-8 h-8 text-yellow-500" />,
               description: 'Powered by Stripe for secure transactions'
             }
           ].map((feature) => (
-            <div key={feature.name} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div key={feature.name} className="p-6 bg-white border border-gray-100 shadow-sm rounded-xl">
               <div className="flex items-center mb-4">
-                <div className="bg-blue-50 p-2 rounded-lg mr-4">
+                <div className="p-2 mr-4 rounded-lg bg-blue-50">
                   {feature.icon}
                 </div>
                 <h3 className="text-lg font-bold text-gray-900">{feature.name}</h3>

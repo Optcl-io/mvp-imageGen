@@ -81,7 +81,7 @@ const ContactPage = () => {
   ];
 
   return (
-    <div className="w-full h-full py-20 bg-white" id="contact">
+    <div className="w-full h-full py-20 bg-white" id="contact flex">
       <div className="container px-6 mx-auto max-w-7xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

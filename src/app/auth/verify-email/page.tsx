@@ -23,12 +23,11 @@ function VerifyEmailPage2() {
       setEmail(emailParam);
     }
     
-    // Focus the first input field on load
-    const firstInput = inputRefs[0][0];
-    if (firstInput) {
-      firstInput.focus();
+    // Focus on first input on load
+    if (inputRefs[0]?.current) {
+      inputRefs[0].current.focus();
     }
-  }, [searchParams]);
+  }, [searchParams, inputRefs]);
 
   const handleInputChange = (index: number, value: string) => {
     // Only allow numbers

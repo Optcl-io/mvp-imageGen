@@ -51,8 +51,8 @@ export default function NewsletterSubscribe({
   return (
     <div className={`rounded-lg p-8 ${className}`}>
       <div className="flex flex-col items-center justify-center max-w-3xl mx-auto text-center">
-        <h2 className="text-xl font-extrabold text-gray-100">{title}</h2>
-        <p className="mt-3 text-[15px] text-gray-300">{subtitle}</p>
+        <h2 className="text-xl font-extrabold text-gray-900">{title}</h2>
+        <p className="mt-3 text-[15px] text-gray-700">{subtitle}</p>
         
         {emailSubscribed ? (
           <div className="p-4 mt-8 border border-green-200 rounded-md bg-green-50">
@@ -79,7 +79,7 @@ export default function NewsletterSubscribe({
               required
               value={subscribeEmail}
               onChange={(e) => setSubscribeEmail(e.target.value)}
-              className="w-full px-5 py-3 placeholder-gray-100 border border-gray-100 rounded-l-md focus:ring-blue-500 focus:border-blue-500 sm:max-w-xs"
+              className="w-full px-5 py-3 text-black placeholder-gray-900 border border-gray-900 rounded-l-md focus:ring-blue-500 focus:border-blue-500 sm:max-w-xs"
               placeholder="Enter your email"
             />
             <div className="mt-3 shadow rounded-r-md sm:mt-0 sm:flex-shrink-0">
@@ -100,7 +100,7 @@ export default function NewsletterSubscribe({
           </div>
         )}
         
-        <p className="mt-3 text-sm text-gray-300">
+        <p className="mt-3 text-sm text-gray-700">
           We care about your data. Read our{' '}
           <Link href="/privacy" className="font-medium text-blue-400 hover:text-blue-500">
             Privacy Policy

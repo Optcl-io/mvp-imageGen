@@ -166,6 +166,13 @@ function PaymentSuccessContent() {
     }
   };
 
+  // Update the hook with proper dependency
+  useEffect(() => {
+    if (searchParams.get('session_id')) {
+      completeVerification();
+    }
+  }, [searchParams, completeVerification]);  // Include completeVerification as a dependency
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <div className="w-full max-w-md p-8 mx-auto bg-white rounded-xl shadow-lg">

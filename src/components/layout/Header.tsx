@@ -65,7 +65,7 @@ export default function Header() {
               <div className="hidden md:block">
                 {session?.user ? (
                   <Menu as="div" className="relative ml-4">
-                    <Menu.Button className="flex items-center w-48 space-x-2 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    <Menu.Button className="flex items-center justify-end w-48 space-x-2 text-sm rounded-full focus:outline-none">
                       <span className="sr-only">Open user menu</span>
                       {session.user.image ? (
                         <div className="relative w-10 h-10 overflow-hidden border-2 border-white rounded-full shadow-md">
@@ -77,7 +77,7 @@ export default function Header() {
                           />
                         </div>
                       ) : (
-                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-pink-500">
                           <span className="text-xl font-bold text-white">
                             {session.user.name?.charAt(0).toUpperCase() || 'U'}
                           </span>
